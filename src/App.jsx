@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { DRILLS } from './data/drills';
 import useLessonProgress from './hooks/useLessonProgress';
+import useResponsiveMode from './hooks/useResponsiveMode';
 import { exportLessonData } from './utils/exportLessons';
 import WaterBackground from './components/swimmer/WaterBackground';
 import GhostSwimmer from './components/swimmer/GhostSwimmer';
@@ -9,6 +10,7 @@ import SwimmerRig from './components/swimmer/SwimmerRig';
 import PlaybackControls from './components/layout/PlaybackControls';
 import CoachingPanel from './components/layout/CoachingPanel';
 import LessonNavigator from './components/layout/LessonNavigator';
+import MobilePracticeBar from './components/layout/MobilePracticeBar';
 
 export default function App() {
   const [showGuides, setShowGuides] = useState(true);
@@ -18,6 +20,7 @@ export default function App() {
   const [mode, setMode] = useState('correct');
   const [drill, setDrill] = useState('superman');
   const { progress: completed, markComplete } = useLessonProgress({ superman: true });
+  const { isMobile } = useResponsiveMode();
 
   const currentDrill = DRILLS[drill];
   const isCorrect = mode === 'correct';
@@ -45,7 +48,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 p-4 text-white md:p-6">
+    <div className="min-h-screen w-full bg-slate-950 p-4 pb-28 text-white md:p-6 md:pb-6">
       <div className="mx-auto w-full max-w-6xl">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
@@ -94,7 +97,7 @@ export default function App() {
         <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-cyan-800 via-sky-900 to-slate-950 shadow-2xl">
           <WaterBackground playbackSpeed={playbackSpeed} />
 
-          <div className="relative h-[560px] md:h-[620px]">
+          <div className={isMobile ? 'relative h-[620px]' : 'relative h-[620px]'}>
             <GhostSwimmer enabled={ghostMode} />
 
             <OverlayLayer
@@ -138,6 +141,11 @@ export default function App() {
           markComplete={markComplete}
         />
       </div>
+
+      <MobilePracticeBar
+        currentDrill={currentDrill}
+        completedCount={practiceStats.completedCount}
+      />
     </div>
   );
 }

@@ -2,28 +2,99 @@ export const DRILLS = {
   superman: {
     title: 'Superman Glide',
     phase: 'Balance',
-    description: 'Release the neck. Let the body lengthen.'
+    description: 'Release the neck. Look down. Press the chest gently. Let the hips float.',
+    tags: ['Heavy head', 'Eyes down', 'Press chest', 'Quiet water'],
+    coach: 'Let the head hang. Trust the water before you add effort.',
+    next: 'Lazy Flutter',
   },
   flutter: {
     title: 'Lazy Flutter',
     phase: 'Balance',
-    description: 'Add a tiny effortless flutter kick.'
+    description: 'Add a tiny effortless flutter kick while preserving balance and silence.',
+    tags: ['Tiny kick', 'No splash', 'Quiet legs', 'Balance first'],
+    coach: 'The kick only keeps the glide alive. It does not hold the body up.',
+    next: 'Chest Press → Hip Rise',
   },
   chestPress: {
     title: 'Chest Press → Hip Rise',
     phase: 'Balance',
-    description: 'Shift weight forward and allow the hips to float upward.'
+    description: 'Cooperate with gravity by pressing the chest gently and allowing the hips to rise naturally.',
+    tags: ['Chest pressure', 'Hips rise', 'No hard kick', 'Balance shift'],
+    coach: 'A small forward weight shift lifts the hips more effectively than frantic kicking.',
+    next: 'Skating Position',
   },
   skating: {
     title: 'Skating Position',
     phase: 'Streamline',
-    description: 'Rotate into a long narrow vessel.'
+    description: 'Rotate onto the side and shape a long narrow vessel through the water.',
+    tags: ['Side balance', 'Patient lead arm', 'Quiet rotation', 'Long vessel'],
+    coach: 'Hide the body from the water. Long and narrow beats flat and wide.',
+    next: 'Head Roll Breathing',
   },
   breathing: {
     title: 'Head Roll Breathing',
-    phase: 'Breathing',
-    description: 'Rotate to breathe without lifting the head.'
-  }
+    phase: 'Streamline',
+    description: 'Rotate the head smoothly with the body while keeping one goggle in the water.',
+    tags: ['One goggle', 'No head lift', 'Quiet breath', 'Maintain balance'],
+    coach: 'Roll to breathe. Do not lift to breathe.',
+    next: 'Single Switch',
+  },
+  singleSwitch: {
+    title: 'Single Switch',
+    phase: 'Core Propulsion',
+    description: 'Slide the recovering hand through the mail slot while rotating the core to the opposite skate.',
+    tags: ['Mail slot', 'Core rotation', 'Quiet switch', 'Patient glide'],
+    coach: 'The torso moves the swimmer. The hand enters quietly and follows the rotation.',
+    next: 'Triple Switch',
+  },
+  tripleSwitch: {
+    title: 'Triple Switch',
+    phase: 'Core Propulsion',
+    description: 'Chain three smooth switches together before settling into a balanced glide.',
+    tags: ['R-L-R rhythm', 'Core timing', 'Smooth transitions', 'Extended glide'],
+    coach: 'Switch, balance, switch, balance. Do not rush the exchange.',
+    next: 'Rhythm Swim',
+  },
+  rhythm: {
+    title: 'Rhythm Swim',
+    phase: 'Integration',
+    description: 'Discover an unhurried rhythm with smooth rotation and patient lead-arm timing.',
+    tags: ['Unhurried tempo', 'Flow state', 'Steady breathing', 'Relaxed rhythm'],
+    coach: 'The rhythm should feel almost too slow. That is where efficiency starts.',
+    next: 'Continuous Flow',
+  },
+  continuousFlow: {
+    title: 'Continuous Flow',
+    phase: 'Integration',
+    description: 'Connect balanced body position, breathing, and switching into uninterrupted whole-stroke motion.',
+    tags: ['Continuous motion', 'Quiet flow', 'Integrated breathing', 'Relaxed recovery'],
+    coach: 'Let the pieces connect without adding intensity.',
+    next: 'Stroke Count Efficiency',
+  },
+  spl: {
+    title: 'Stroke Count Efficiency',
+    phase: 'Metrics',
+    description: 'Visualize how patient movement reduces drag and lowers stroke count per length.',
+    tags: ['Efficiency', 'Lower drag', 'Patient lead arm', 'Fewer strokes'],
+    coach: 'Count strokes as feedback, not judgment. A spike means slow down and reset.',
+    next: 'Effortless 25',
+  },
+  effortless25: {
+    title: 'Effortless 25',
+    phase: 'Graduation',
+    description: 'Swim continuously with relaxed breathing, quiet movement, and stable stroke count.',
+    tags: ['Steady SPL', 'Relaxed breathing', 'Silent swimming', 'Calm rhythm'],
+    coach: 'Consistency is the goal. Keep the same calm stroke count across the length.',
+    next: 'Efficient vs Rushed',
+  },
+  comparison: {
+    title: 'Efficient vs Rushed',
+    phase: 'Diagnostics',
+    description: 'Compare calm streamlined swimming against rushed, high-drag movement patterns.',
+    tags: ['Drag comparison', 'Silent water', 'Patient timing', 'Lower effort'],
+    coach: 'Turbulence is information. Noise, splash, and sinking legs point to excess effort.',
+    next: 'Adaptive Coaching',
+  },
 };
 
 export const DRILL_ORDER = Object.keys(DRILLS);

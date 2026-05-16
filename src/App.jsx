@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { DRILLS } from './data/drills';
+import useLessonProgress from './hooks/useLessonProgress';
+import { exportLessonData } from './utils/exportLessons';
 import WaterBackground from './components/swimmer/WaterBackground';
 import GhostSwimmer from './components/swimmer/GhostSwimmer';
 import OverlayLayer from './components/swimmer/OverlayLayer';
@@ -15,14 +17,10 @@ export default function App() {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [mode, setMode] = useState('correct');
   const [drill, setDrill] = useState('superman');
-  const [completed, setCompleted] = useState({ superman: true });
+  const { progress: completed, markComplete } = useLessonProgress({ superman: true });
 
   const currentDrill = DRILLS[drill];
   const isCorrect = mode === 'correct';
-
-  const markComplete = (key) => {
-    setCompleted((prev) => ({ ...prev, [key]: true }));
-  };
 
   const practiceStats = useMemo(() => {
     const completedCount = Object.values(completed).filter(Boolean).length;
@@ -31,6 +29,20 @@ export default function App() {
       completedCount,
     };
   }, [completed]);
+
+  const handleExport = () => {
+    exportLessonData({
+      drill,
+      progress: completed,
+      settings: {
+        showGuides,
+        ghostMode,
+        audioMode,
+        playbackSpeed,
+        mode,
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen w-full bg-slate-950 p-4 text-white md:p-6">
@@ -50,8 +62,17 @@ export default function App() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-cyan-100/10 bg-cyan-100/5 px-5 py-4 text-sm text-cyan-100">
-            {practiceStats.completedCount} drills explored
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <button
+              onClick={handleExport}
+              className="rounded-2xl border border-white/10 bg-white/10 px-5 py-4 text-sm text-white transition hover:bg-white/20"
+            >
+              Export lesson data
+            </button>
+
+            <div className="rounded-2xl border border-cyan-100/10 bg-cyan-100/5 px-5 py-4 text-sm text-cyan-100">
+              {practiceStats.completedCount} drills explored
+            </div>
           </div>
         </div>
 
@@ -90,7 +111,7 @@ export default function App() {
             />
 
             <div className="absolute bottom-6 left-6 right-6 grid gap-3 md:grid-cols-4">
-              {currentDrill.tags.map((item, index) => (
+              {currentDrill.tags.map((item) => (
                 <div
                   key={item}
                   className="rounded-2xl border border-white/10 bg-slate-950/35 p-4 backdrop-blur"

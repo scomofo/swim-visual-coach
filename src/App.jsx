@@ -5,6 +5,7 @@ import useResponsiveMode from './hooks/useResponsiveMode';
 import useTelemetry from './hooks/useTelemetry';
 import usePerformanceMode from './hooks/usePerformanceMode';
 import useGuidedNarration from './hooks/useGuidedNarration';
+import useGuidedPractice from './hooks/useGuidedPractice';
 import { exportLessonData } from './utils/exportLessons';
 import WaterBackground from './components/swimmer/WaterBackground';
 import GhostSwimmer from './components/swimmer/GhostSwimmer';
@@ -16,6 +17,7 @@ import LessonNavigator from './components/layout/LessonNavigator';
 import MobilePracticeBar from './components/layout/MobilePracticeBar';
 import SessionStatsPanel from './components/layout/SessionStatsPanel';
 import PracticeStatsPanel from './components/layout/PracticeStatsPanel';
+import GuidedPracticePanel from './components/layout/GuidedPracticePanel';
 
 export default function App() {
   const [showGuides, setShowGuides] = useState(true);
@@ -24,11 +26,19 @@ export default function App() {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [mode, setMode] = useState('correct');
   const [drill, setDrill] = useState('superman');
+  const [guidedMode, setGuidedMode] = useState(true);
+
   const { progress: completed, markComplete } = useLessonProgress({ superman: true });
   const { isMobile } = useResponsiveMode();
   const telemetry = useTelemetry(drill);
   const { reducedMotion } = usePerformanceMode();
   const { speakDrill } = useGuidedNarration(audioMode);
+
+  const guidedPractice = useGuidedPractice({
+    drill,
+    setDrill,
+    markComplete,
+  });
 
   const currentDrill = DRILLS[drill];
   const isCorrect = mode === 'correct';
@@ -62,6 +72,7 @@ export default function App() {
         playbackSpeed: effectivePlaybackSpeed,
         mode,
         reducedMotion,
+        guidedMode,
       },
     });
   };
@@ -86,6 +97,17 @@ export default function App() {
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <button
+              onClick={() => setGuidedMode(!guidedMode)}
+              className={`rounded-2xl px-5 py-4 text-sm font-medium transition ${
+                guidedMode
+                  ? 'bg-cyan-100 text-slate-950'
+                  : 'border border-white/10 bg-white/10 text-white hover:bg-white/20'
+              }`}
+            >
+              {guidedMode ? 'Guided Session Active' : 'Enable Guided Session'}
+            </button>
+
+            <button
               onClick={handleExport}
               className="rounded-2xl border border-white/10 bg-white/10 px-5 py-4 text-sm text-white transition hover:bg-white/20"
             >
@@ -97,6 +119,16 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {guidedMode && (
+          <GuidedPracticePanel
+            currentDrill={currentDrill}
+            sessionStep={guidedPractice.sessionStep}
+            totalSteps={guidedPractice.totalSteps}
+            onAdvance={guidedPractice.advance}
+            onRepeat={guidedPractice.repeat}
+          />
+        )}
 
         <div className="mb-4">
           <PlaybackControls

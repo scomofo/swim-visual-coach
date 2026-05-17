@@ -1,7 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DRILLS } from './data/drills';
 import useLessonProgress from './hooks/useLessonProgress';
 import useResponsiveMode from './hooks/useResponsiveMode';
+import useTelemetry from './hooks/useTelemetry';
+import usePerformanceMode from './hooks/usePerformanceMode';
+import useGuidedNarration from './hooks/useGuidedNarration';
 import { exportLessonData } from './utils/exportLessons';
 import WaterBackground from './components/swimmer/WaterBackground';
 import GhostSwimmer from './components/swimmer/GhostSwimmer';
@@ -11,6 +14,8 @@ import PlaybackControls from './components/layout/PlaybackControls';
 import CoachingPanel from './components/layout/CoachingPanel';
 import LessonNavigator from './components/layout/LessonNavigator';
 import MobilePracticeBar from './components/layout/MobilePracticeBar';
+import SessionStatsPanel from './components/layout/SessionStatsPanel';
+import PracticeStatsPanel from './components/layout/PracticeStatsPanel';
 
 export default function App() {
   const [showGuides, setShowGuides] = useState(true);
@@ -21,9 +26,17 @@ export default function App() {
   const [drill, setDrill] = useState('superman');
   const { progress: completed, markComplete } = useLessonProgress({ superman: true });
   const { isMobile } = useResponsiveMode();
+  const telemetry = useTelemetry(drill);
+  const { reducedMotion } = usePerformanceMode();
+  const { speakDrill } = useGuidedNarration(audioMode);
 
   const currentDrill = DRILLS[drill];
   const isCorrect = mode === 'correct';
+  const effectivePlaybackSpeed = reducedMotion ? 0.5 : playbackSpeed;
+
+  useEffect(() => {
+    speakDrill(drill);
+  }, [drill, speakDrill]);
 
   const practiceStats = useMemo(() => {
     const completedCount = Object.values(completed).filter(Boolean).length;
@@ -33,6 +46,11 @@ export default function App() {
     };
   }, [completed]);
 
+  const localMetrics = {
+    ...telemetry,
+    reducedMotion,
+  };
+
   const handleExport = () => {
     exportLessonData({
       drill,
@@ -41,8 +59,9 @@ export default function App() {
         showGuides,
         ghostMode,
         audioMode,
-        playbackSpeed,
+        playbackSpeed: effectivePlaybackSpeed,
         mode,
+        reducedMotion,
       },
     });
   };
@@ -95,7 +114,7 @@ export default function App() {
         </div>
 
         <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-cyan-800 via-sky-900 to-slate-950 shadow-2xl">
-          <WaterBackground playbackSpeed={playbackSpeed} />
+          <WaterBackground playbackSpeed={effectivePlaybackSpeed} />
 
           <div className={isMobile ? 'relative h-[620px]' : 'relative h-[620px]'}>
             <GhostSwimmer enabled={ghostMode} />
@@ -110,7 +129,7 @@ export default function App() {
               drill={drill}
               isCorrect={isCorrect}
               showGuides={showGuides}
-              playbackSpeed={playbackSpeed}
+              playbackSpeed={effectivePlaybackSpeed}
             />
 
             <div className="absolute bottom-6 left-6 right-6 grid gap-3 md:grid-cols-4">
@@ -128,11 +147,19 @@ export default function App() {
           </div>
         </div>
 
+        <SessionStatsPanel
+          completedCount={practiceStats.completedCount}
+          playbackSpeed={effectivePlaybackSpeed}
+          audioMode={audioMode}
+        />
+
         <CoachingPanel
           drill={drill}
           currentDrill={currentDrill}
           audioMode={audioMode}
         />
+
+        <PracticeStatsPanel metrics={localMetrics} />
 
         <LessonNavigator
           drill={drill}

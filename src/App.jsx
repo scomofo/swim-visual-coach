@@ -6,6 +6,7 @@ import useTelemetry from './hooks/useTelemetry';
 import usePerformanceMode from './hooks/usePerformanceMode';
 import useGuidedNarration from './hooks/useGuidedNarration';
 import useGuidedPractice from './hooks/useGuidedPractice';
+import usePracticeTimer from './hooks/usePracticeTimer';
 import { exportLessonData } from './utils/exportLessons';
 import WaterBackground from './components/swimmer/WaterBackground';
 import GhostSwimmer from './components/swimmer/GhostSwimmer';
@@ -18,6 +19,7 @@ import MobilePracticeBar from './components/layout/MobilePracticeBar';
 import SessionStatsPanel from './components/layout/SessionStatsPanel';
 import PracticeStatsPanel from './components/layout/PracticeStatsPanel';
 import GuidedPracticePanel from './components/layout/GuidedPracticePanel';
+import PoolsideModePanel from './components/layout/PoolsideModePanel';
 
 export default function App() {
   const [showGuides, setShowGuides] = useState(true);
@@ -27,6 +29,7 @@ export default function App() {
   const [mode, setMode] = useState('correct');
   const [drill, setDrill] = useState('superman');
   const [guidedMode, setGuidedMode] = useState(true);
+  const [poolsideMode, setPoolsideMode] = useState(true);
 
   const { progress: completed, markComplete } = useLessonProgress({ superman: true });
   const { isMobile } = useResponsiveMode();
@@ -39,6 +42,8 @@ export default function App() {
     setDrill,
     markComplete,
   });
+
+  const practiceTimer = usePracticeTimer(poolsideMode);
 
   const currentDrill = DRILLS[drill];
   const isCorrect = mode === 'correct';
@@ -73,6 +78,7 @@ export default function App() {
         mode,
         reducedMotion,
         guidedMode,
+        poolsideMode,
       },
     });
   };
@@ -108,6 +114,17 @@ export default function App() {
             </button>
 
             <button
+              onClick={() => setPoolsideMode(!poolsideMode)}
+              className={`rounded-2xl px-5 py-4 text-sm font-medium transition ${
+                poolsideMode
+                  ? 'bg-cyan-100 text-slate-950'
+                  : 'border border-white/10 bg-white/10 text-white hover:bg-white/20'
+              }`}
+            >
+              {poolsideMode ? 'Poolside Mode Active' : 'Enable Poolside Mode'}
+            </button>
+
+            <button
               onClick={handleExport}
               className="rounded-2xl border border-white/10 bg-white/10 px-5 py-4 text-sm text-white transition hover:bg-white/20"
             >
@@ -127,6 +144,16 @@ export default function App() {
             totalSteps={guidedPractice.totalSteps}
             onAdvance={guidedPractice.advance}
             onRepeat={guidedPractice.repeat}
+          />
+        )}
+
+        {poolsideMode && (
+          <PoolsideModePanel
+            timer={practiceTimer}
+            currentDrill={currentDrill}
+            guidedMode={guidedMode}
+            onPause={() => practiceTimer.setRunning(false)}
+            onResume={() => practiceTimer.setRunning(true)}
           />
         )}
 

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export default function OverlayLayer({ drill, showGuides, isCorrect }) {
+export default function OverlayLayer({ showGuides, isCorrect }) {
   if (!showGuides) return null;
 
   return (

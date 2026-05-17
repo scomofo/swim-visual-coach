@@ -10,7 +10,6 @@ import ComparisonOverlay from '../overlays/ComparisonOverlay';
 export default function SwimmerRig({
   drill,
   isCorrect,
-  showGuides,
   playbackSpeed,
 }) {
   const bodyRotation = getBodyRotation(drill, isCorrect);

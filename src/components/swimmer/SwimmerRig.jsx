@@ -12,6 +12,7 @@ export default function SwimmerRig({
   drill,
   isCorrect,
   playbackSpeed,
+  activeTag,
 }) {
   const bodyRotation = getBodyRotation(drill, isCorrect);
 
@@ -23,6 +24,20 @@ export default function SwimmerRig({
   const isSPL = drill === 'spl';
   const isEffortless25 = drill === 'effortless25';
   const isComparison = drill === 'comparison';
+
+  const getTagHighlight = (tag) => {
+    if (!activeTag) return null;
+    const lowerTag = tag.toLowerCase();
+    const lowerActive = activeTag.toLowerCase();
+
+    // Map keywords to body parts
+    if (lowerActive.includes('head') && lowerTag === 'head') return true;
+    if ((lowerActive.includes('chest') || lowerActive.includes('press')) && lowerTag === 'chest') return true;
+    if ((lowerActive.includes('hips') || lowerActive.includes('leg') || lowerActive.includes('kick')) && lowerTag === 'hips') return true;
+    if (lowerActive.includes('arm') && lowerTag === 'arm') return true;
+
+    return false;
+  };
 
   return (
     <motion.div
@@ -87,20 +102,34 @@ export default function SwimmerRig({
             strokeLinecap="round"
           />
 
-          <ellipse
+          <motion.ellipse
             cx="425"
             cy="124"
             rx="150"
             ry="48"
-            fill="rgba(248,250,252,0.98)"
+            animate={{
+              fill: getTagHighlight('chest')
+                ? 'rgba(34, 211, 238, 0.8)'
+                : 'rgba(248,250,252,0.98)',
+              filter: getTagHighlight('chest')
+                ? 'drop-shadow(0 0 12px rgba(34, 211, 238, 0.6))'
+                : 'none',
+            }}
           />
 
-          <ellipse
+          <motion.ellipse
             cx="285"
             cy={isCorrect ? '128' : '151'}
             rx="80"
             ry="36"
-            fill="rgba(226,232,240,0.98)"
+            animate={{
+              fill: getTagHighlight('hips')
+                ? 'rgba(34, 211, 238, 0.8)'
+                : 'rgba(226,232,240,0.98)',
+              filter: getTagHighlight('hips')
+                ? 'drop-shadow(0 0 12px rgba(34, 211, 238, 0.6))'
+                : 'none',
+            }}
           />
 
           <motion.path
@@ -152,11 +181,18 @@ export default function SwimmerRig({
             }}
             style={{ transformOrigin: '565px 106px' }}
           >
-            <circle
+            <motion.circle
               cx="562"
               cy={isCorrect ? '104' : '78'}
               r="38"
-              fill="rgba(248,250,252,0.98)"
+              animate={{
+                fill: getTagHighlight('head')
+                  ? 'rgba(34, 211, 238, 0.8)'
+                  : 'rgba(248,250,252,0.98)',
+                filter: getTagHighlight('head')
+                  ? 'drop-shadow(0 0 12px rgba(34, 211, 238, 0.6))'
+                  : 'none',
+              }}
             />
           </motion.g>
         </motion.g>

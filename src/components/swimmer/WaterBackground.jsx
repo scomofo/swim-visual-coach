@@ -1,10 +1,21 @@
 import { motion } from 'framer-motion';
 
-export default function WaterBackground({ playbackSpeed = 1 }) {
+export default function WaterBackground({ playbackSpeed = 1, focusMode = false }) {
   return (
     <div className="absolute inset-0 overflow-hidden bg-slate-950">
       {/* Deep water gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-cyan-900/40 via-sky-950 to-slate-950" />
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-b from-cyan-900/40 via-sky-950 to-slate-950"
+        animate={{
+          opacity: focusMode ? 0.8 : 1,
+          scale: focusMode ? [1, 1.05, 1] : 1,
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
 
       {/* Animated Caustics Layer 1 */}
       <motion.div

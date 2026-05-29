@@ -36,6 +36,7 @@ export default function App() {
   const [focusMode, setFocusMode] = useState(false);
   const { showOnboarding, closeOnboarding } = useOnboarding();
   const [showCelebration, setShowCelebration] = useState(false);
+  const [activeTag, setActiveTag] = useState(null);
 
   const { progress: completed, markComplete: baseMarkComplete } = useLessonProgress({ superman: true });
 
@@ -66,6 +67,13 @@ export default function App() {
   useEffect(() => {
     speakDrill(drill);
   }, [drill, speakDrill]);
+
+  // Reset active tag when drill changes
+  const [prevDrill, setPrevDrill] = useState(drill);
+  if (drill !== prevDrill) {
+    setPrevDrill(drill);
+    setActiveTag(null);
+  }
 
   const practiceStats = useMemo(() => {
     const completedCount = Object.values(completed).filter(Boolean).length;
@@ -212,8 +220,8 @@ export default function App() {
           />
         </div>
 
-        <div className={`relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-cyan-800 via-sky-900 to-slate-950 shadow-2xl transition-all duration-500 ${focusMode ? 'h-[80vh]' : ''}`}>
-          <WaterBackground playbackSpeed={effectivePlaybackSpeed} />
+        <div className={`relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-cyan-800 via-sky-900 to-slate-950 shadow-2xl transition-all duration-500 ${focusMode ? 'h-[80vh] shadow-[0_0_50px_rgba(0,0,0,0.5)]' : ''}`}>
+          <WaterBackground playbackSpeed={effectivePlaybackSpeed} focusMode={focusMode} />
 
           <div className={isMobile ? 'relative h-[620px]' : 'relative h-[620px]'}>
             <AnimatePresence mode="wait">
@@ -238,20 +246,30 @@ export default function App() {
                   isCorrect={isCorrect}
                   showGuides={showGuides}
                   playbackSpeed={effectivePlaybackSpeed}
+                  activeTag={activeTag}
                 />
               </motion.div>
             </AnimatePresence>
 
             <div className="absolute bottom-6 left-6 right-6 grid gap-3 md:grid-cols-4">
               {currentDrill.tags.map((item) => (
-                <div
+                <motion.button
                   key={item}
-                  className="rounded-2xl border border-white/10 bg-slate-950/35 p-4 backdrop-blur"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setActiveTag(activeTag === item ? null : item)}
+                  className={`rounded-2xl border p-4 text-left backdrop-blur transition-all ${
+                    activeTag === item
+                      ? 'border-cyan-300 bg-cyan-400/20 shadow-[0_0_20px_rgba(34,211,238,0.2)]'
+                      : 'border-white/10 bg-slate-950/35 hover:bg-slate-900/50'
+                  }`}
                 >
-                  <div className="text-sm font-medium text-cyan-100">
+                  <div className={`text-sm font-medium transition-colors ${
+                    activeTag === item ? 'text-white' : 'text-cyan-100'
+                  }`}>
                     {item}
                   </div>
-                </div>
+                </motion.button>
               ))}
             </div>
           </div>

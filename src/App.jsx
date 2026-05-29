@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { DRILLS } from './data/drills';
 import useLessonProgress from './hooks/useLessonProgress';
+import useOnboarding from './hooks/useOnboarding';
 import useResponsiveMode from './hooks/useResponsiveMode';
 import useTelemetry from './hooks/useTelemetry';
 import usePerformanceMode from './hooks/usePerformanceMode';
@@ -20,6 +22,7 @@ import SessionStatsPanel from './components/layout/SessionStatsPanel';
 import PracticeStatsPanel from './components/layout/PracticeStatsPanel';
 import GuidedPracticePanel from './components/layout/GuidedPracticePanel';
 import PoolsideModePanel from './components/layout/PoolsideModePanel';
+import OnboardingModal from './components/layout/OnboardingModal';
 
 export default function App() {
   const [showGuides, setShowGuides] = useState(true);
@@ -30,8 +33,19 @@ export default function App() {
   const [drill, setDrill] = useState('superman');
   const [guidedMode, setGuidedMode] = useState(true);
   const [poolsideMode, setPoolsideMode] = useState(true);
+  const [focusMode, setFocusMode] = useState(false);
+  const { showOnboarding, closeOnboarding } = useOnboarding();
+  const [showCelebration, setShowCelebration] = useState(false);
 
-  const { progress: completed, markComplete } = useLessonProgress({ superman: true });
+  const { progress: completed, markComplete: baseMarkComplete } = useLessonProgress({ superman: true });
+
+  const markComplete = useCallback((key) => {
+    if (!completed[key]) {
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 2000);
+    }
+    baseMarkComplete(key);
+  }, [completed, baseMarkComplete]);
   const { isMobile } = useResponsiveMode();
   const telemetry = useTelemetry(drill);
   const { reducedMotion } = usePerformanceMode();
@@ -84,9 +98,33 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 p-4 pb-28 text-white md:p-6 md:pb-6">
-      <div className="mx-auto w-full max-w-6xl">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="min-h-screen w-full bg-slate-950 p-4 pb-28 text-white md:p-6 md:pb-6 transition-colors duration-700">
+      <AnimatePresence>
+        {showOnboarding && (
+          <OnboardingModal onClose={closeOnboarding} />
+        )}
+      </AnimatePresence>
+
+      <div className={`mx-auto w-full max-w-6xl transition-all duration-500 ${focusMode ? 'max-w-7xl' : ''}`}>
+        <AnimatePresence>
+          {showCelebration && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.1 }}
+              className="fixed left-1/2 top-1/4 z-[60] -translate-x-1/2 pointer-events-none"
+            >
+              <div className="rounded-full bg-cyan-400 px-8 py-3 text-lg font-bold text-slate-950 shadow-[0_0_40px_rgba(34,211,238,0.6)]">
+                Drill Mastered!
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.div
+          animate={{ opacity: focusMode ? 0 : 1, height: focusMode ? 0 : 'auto', marginBottom: focusMode ? 0 : 24 }}
+          className="mb-6 flex flex-col gap-4 overflow-hidden md:flex-row md:items-end md:justify-between"
+        >
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-200/70">
               Total Immersion Visual Coach
@@ -135,9 +173,9 @@ export default function App() {
               {practiceStats.completedCount} drills explored
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {guidedMode && (
+        {guidedMode && !focusMode && (
           <GuidedPracticePanel
             currentDrill={currentDrill}
             sessionStep={guidedPractice.sessionStep}
@@ -147,7 +185,7 @@ export default function App() {
           />
         )}
 
-        {poolsideMode && (
+        {poolsideMode && !focusMode && (
           <PoolsideModePanel
             timer={practiceTimer}
             currentDrill={currentDrill}
@@ -169,27 +207,40 @@ export default function App() {
             setAudioMode={setAudioMode}
             mode={mode}
             setMode={setMode}
+            focusMode={focusMode}
+            setFocusMode={setFocusMode}
           />
         </div>
 
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-cyan-800 via-sky-900 to-slate-950 shadow-2xl">
+        <div className={`relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-cyan-800 via-sky-900 to-slate-950 shadow-2xl transition-all duration-500 ${focusMode ? 'h-[80vh]' : ''}`}>
           <WaterBackground playbackSpeed={effectivePlaybackSpeed} />
 
           <div className={isMobile ? 'relative h-[620px]' : 'relative h-[620px]'}>
-            <GhostSwimmer enabled={ghostMode} />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={drill}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="absolute inset-0"
+              >
+                <GhostSwimmer enabled={ghostMode} />
 
-            <OverlayLayer
-              drill={drill}
-              showGuides={showGuides}
-              isCorrect={isCorrect}
-            />
+                <OverlayLayer
+                  drill={drill}
+                  showGuides={showGuides}
+                  isCorrect={isCorrect}
+                />
 
-            <SwimmerRig
-              drill={drill}
-              isCorrect={isCorrect}
-              showGuides={showGuides}
-              playbackSpeed={effectivePlaybackSpeed}
-            />
+                <SwimmerRig
+                  drill={drill}
+                  isCorrect={isCorrect}
+                  showGuides={showGuides}
+                  playbackSpeed={effectivePlaybackSpeed}
+                />
+              </motion.div>
+            </AnimatePresence>
 
             <div className="absolute bottom-6 left-6 right-6 grid gap-3 md:grid-cols-4">
               {currentDrill.tags.map((item) => (
@@ -206,32 +257,44 @@ export default function App() {
           </div>
         </div>
 
-        <SessionStatsPanel
-          completedCount={practiceStats.completedCount}
-          playbackSpeed={effectivePlaybackSpeed}
-          audioMode={audioMode}
-        />
+        <AnimatePresence>
+          {!focusMode && (
+            <motion.div
+              initial={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <SessionStatsPanel
+                completedCount={practiceStats.completedCount}
+                playbackSpeed={effectivePlaybackSpeed}
+                audioMode={audioMode}
+              />
 
-        <CoachingPanel
-          drill={drill}
-          currentDrill={currentDrill}
-          audioMode={audioMode}
-        />
+              <CoachingPanel
+                drill={drill}
+                currentDrill={currentDrill}
+                audioMode={audioMode}
+              />
 
-        <PracticeStatsPanel metrics={localMetrics} />
+              <PracticeStatsPanel metrics={localMetrics} />
 
-        <LessonNavigator
-          drill={drill}
-          setDrill={setDrill}
-          completed={completed}
-          markComplete={markComplete}
-        />
+              <LessonNavigator
+                drill={drill}
+                setDrill={setDrill}
+                completed={completed}
+                markComplete={markComplete}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <MobilePracticeBar
-        currentDrill={currentDrill}
-        completedCount={practiceStats.completedCount}
-      />
+      {!focusMode && (
+        <MobilePracticeBar
+          currentDrill={currentDrill}
+          completedCount={practiceStats.completedCount}
+        />
+      )}
     </div>
   );
 }

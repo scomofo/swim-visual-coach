@@ -1,7 +1,19 @@
+import { motion } from 'framer-motion';
+
 export default function OnboardingModal({ onClose }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-6 backdrop-blur">
-      <div className="w-full max-w-2xl rounded-[2rem] border border-white/10 bg-slate-900 p-8 shadow-2xl">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-6 backdrop-blur"
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="w-full max-w-2xl rounded-[2rem] border border-white/10 bg-slate-900 p-8 shadow-2xl"
+      >
         <div className="text-sm uppercase tracking-[0.3em] text-cyan-100/60">
           Welcome
         </div>
@@ -51,7 +63,7 @@ export default function OnboardingModal({ onClose }) {
         >
           Begin Practice
         </button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

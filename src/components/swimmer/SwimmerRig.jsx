@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { getBodyRotation, getTravel } from '../../utils/motion';
+import RhythmPulse from '../overlays/RhythmPulse';
 import RhythmDots from '../overlays/RhythmDots';
 import RhythmPath from '../overlays/RhythmPath';
 import ContinuousFlowOverlay from '../overlays/ContinuousFlowOverlay';
@@ -160,6 +161,7 @@ export default function SwimmerRig({
           </motion.g>
         </motion.g>
 
+        <RhythmPulse playbackSpeed={playbackSpeed} />
         {isTripleSwitch && <RhythmDots />}
         {isRhythm && <RhythmPath />}
         {isContinuousFlow && <ContinuousFlowOverlay />}

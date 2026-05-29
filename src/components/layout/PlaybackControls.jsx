@@ -9,6 +9,8 @@ export default function PlaybackControls({
   setAudioMode,
   mode,
   setMode,
+  focusMode,
+  setFocusMode,
 }) {
   return (
     <div className="rounded-3xl border border-white/10 bg-slate-950/45 p-4 backdrop-blur">
@@ -54,6 +56,17 @@ export default function PlaybackControls({
           className="rounded-2xl bg-white/10 px-4 py-2 text-sm text-white transition hover:bg-white/20"
         >
           {audioMode ? 'Narration On' : 'Narration Off'}
+        </button>
+
+        <button
+          onClick={() => setFocusMode(!focusMode)}
+          className={`rounded-2xl px-4 py-2 text-sm transition ${
+            focusMode
+              ? 'bg-cyan-100 text-slate-950 font-medium'
+              : 'bg-white/10 text-white hover:bg-white/20'
+          }`}
+        >
+          {focusMode ? 'Exit Focus' : 'Focus Mode'}
         </button>
 
         {[0.5, 1, 1.5].map((speed) => (

@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion';
+
 export default function PoolsideModePanel({
   timer,
   currentDrill,
@@ -14,56 +16,74 @@ export default function PoolsideModePanel({
     .padStart(2, '0');
 
   return (
-    <div className="mt-5 rounded-[2.5rem] border border-cyan-200/10 bg-slate-950/60 p-8 backdrop-blur">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <div className="text-sm uppercase tracking-[0.3em] text-cyan-100/60">
-            Poolside Mode
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="mt-5 rounded-[3rem] border border-cyan-400/30 bg-slate-950/80 p-10 backdrop-blur-xl shadow-[0_0_50px_rgba(34,211,238,0.1)]"
+    >
+      <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8V12L15 15"/><circle cx="12" cy="12" r="10"/></svg>
+            </div>
+            <div className="text-sm font-bold uppercase tracking-[0.4em] text-cyan-400/80">
+              Active Practice
+            </div>
           </div>
 
-          <h2 className="mt-3 text-4xl font-semibold text-cyan-50 lg:text-5xl">
+          <h2 className="mt-5 text-5xl font-bold tracking-tight text-white lg:text-7xl">
             {currentDrill.title}
           </h2>
 
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-300">
-            Move slowly. Stay relaxed. Let the drill become quiet before advancing.
+          <p className="mt-6 max-w-2xl text-xl leading-relaxed text-slate-300">
+            {currentDrill.description}
           </p>
+
+          <div className="mt-8 flex flex-wrap gap-4">
+            {currentDrill.tags.map(tag => (
+              <span key={tag} className="rounded-full border border-cyan-400/20 bg-cyan-400/5 px-4 py-2 text-sm font-medium text-cyan-200">
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
 
-        <div className="flex flex-col items-start gap-4 lg:items-end">
-          <div className="rounded-[2rem] border border-cyan-100/10 bg-cyan-100/5 px-8 py-6 text-center">
-            <div className="text-sm uppercase tracking-[0.2em] text-cyan-100/60">
+        <div className="flex flex-col items-center gap-6 lg:items-end lg:pl-10">
+          <div className="w-full rounded-[2.5rem] bg-gradient-to-br from-slate-900 to-slate-950 p-8 text-center shadow-inner lg:w-72">
+            <div className="text-xs font-bold uppercase tracking-[0.3em] text-cyan-500/60">
               Practice Time
             </div>
 
-            <div className="mt-2 text-5xl font-semibold text-cyan-50">
+            <div className="mt-3 font-mono text-7xl font-bold tracking-tighter text-cyan-400">
               {minutes}:{seconds}
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex w-full gap-4 lg:w-auto">
             {timer.running ? (
               <button
                 onClick={onPause}
-                className="rounded-2xl border border-white/10 bg-white/10 px-6 py-4 text-base text-white transition hover:bg-white/20"
+                className="flex-1 rounded-3xl border-2 border-white/10 bg-white/5 py-6 text-xl font-bold text-white transition hover:bg-white/10 lg:px-12"
               >
-                Pause Session
+                Pause
               </button>
             ) : (
               <button
                 onClick={onResume}
-                className="rounded-2xl bg-cyan-100 px-6 py-4 text-base font-medium text-slate-950 transition hover:bg-white"
+                className="flex-1 rounded-3xl bg-cyan-400 py-6 text-xl font-bold text-slate-950 transition hover:bg-white lg:px-12"
               >
-                Resume Session
+                Resume
               </button>
             )}
           </div>
 
-          <div className="rounded-2xl border border-cyan-100/10 bg-slate-900/40 px-5 py-3 text-sm text-cyan-100">
-            {guidedMode ? 'guided session active' : 'free practice mode'}
+          <div className="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <span className={`h-2 w-2 rounded-full ${guidedMode ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`} />
+            {guidedMode ? 'Guided Session Active' : 'Free Practice'}
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

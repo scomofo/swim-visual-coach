@@ -4,9 +4,12 @@ export default function usePracticeTimer(active) {
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(active);
 
-  useEffect(() => {
+  // Sync running state with active prop
+  const [prevActive, setPrevActive] = useState(active);
+  if (active !== prevActive) {
+    setPrevActive(active);
     setRunning(active);
-  }, [active]);
+  }
 
   useEffect(() => {
     if (!running) return;

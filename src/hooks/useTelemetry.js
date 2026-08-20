@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function useTelemetry(drill) {
-  const sessionStart = useRef(Date.now());
+  const [sessionStart] = useState(() => Date.now());
+
   const [metrics, setMetrics] = useState({
     elapsedSeconds: 0,
     drillChanges: 0,
@@ -11,7 +12,7 @@ export default function useTelemetry(drill) {
   useEffect(() => {
     const interval = setInterval(() => {
       const elapsedSeconds = Math.floor(
-        (Date.now() - sessionStart.current) / 1000
+        (Date.now() - sessionStart) / 1000
       );
 
       setMetrics((prev) => ({
@@ -21,14 +22,17 @@ export default function useTelemetry(drill) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [sessionStart]);
 
-  useEffect(() => {
+  // Track drill changes
+  const [prevDrillId, setPrevDrillId] = useState(drill);
+  if (drill !== prevDrillId) {
+    setPrevDrillId(drill);
     setMetrics((prev) => ({
       ...prev,
       drillChanges: prev.drillChanges + 1,
     }));
-  }, [drill]);
+  }
 
   return metrics;
 }

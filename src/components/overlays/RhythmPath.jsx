@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 
-export default function RhythmPath() {
+export default function RhythmPath({ reducedMotion = false }) {
   return (
     <motion.g
-      animate={{ opacity: [0.25, 1, 0.25] }}
+      animate={reducedMotion ? false : { opacity: [0.25, 1, 0.25] }}
       transition={{ duration: 4, repeat: Infinity }}
     >
       <path

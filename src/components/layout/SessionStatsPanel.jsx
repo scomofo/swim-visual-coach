@@ -22,7 +22,7 @@ export default function SessionStatsPanel({
         </div>
 
         <div className="mt-2 text-sm text-slate-300">
-          drills explored this session
+          drills completed
         </div>
       </div>
 

@@ -13,6 +13,7 @@ export default function SwimmerRig({
   isCorrect,
   playbackSpeed,
   activeTag,
+  reducedMotion = false,
 }) {
   const bodyRotation = getBodyRotation(drill, isCorrect);
 
@@ -41,8 +42,9 @@ export default function SwimmerRig({
 
   return (
     <motion.div
-      className="absolute left-[8%] top-[34%] h-[190px] w-[78%]"
-      animate={{ x: getTravel(drill), y: [0, -3, 0] }}
+      className="absolute left-[8%] top-[28%] h-[150px] w-[78%] md:top-[34%] md:h-[190px]"
+      data-motion={reducedMotion ? 'static' : 'animated'}
+      animate={reducedMotion ? false : { x: getTravel(drill), y: [0, -3, 0] }}
       transition={{
         duration: 8 / playbackSpeed,
         repeat: Infinity,
@@ -52,7 +54,9 @@ export default function SwimmerRig({
       <svg viewBox="0 0 900 240" className="h-full w-full overflow-visible">
         <motion.g
           animate={
-            isCorrect
+            reducedMotion
+              ? false
+              : isCorrect
               ? {
                   rotate: [bodyRotation, bodyRotation - 0.4, bodyRotation],
                   y: [0, -2, 0],
@@ -75,7 +79,7 @@ export default function SwimmerRig({
             stroke="rgba(186,230,253,0.45)"
             strokeWidth="3"
             strokeLinecap="round"
-            animate={{
+            animate={reducedMotion ? false : {
               opacity: isCorrect
                 ? [0.15, 0.45, 0.15]
                 : [0.4, 0.9, 0.4],
@@ -143,7 +147,9 @@ export default function SwimmerRig({
             strokeWidth="26"
             strokeLinecap="round"
             animate={
-              isCorrect
+              reducedMotion
+                ? false
+                : isCorrect
                 ? {
                     d: isFlutter
                       ? [
@@ -168,7 +174,9 @@ export default function SwimmerRig({
 
           <motion.g
             animate={
-              isCorrect
+              reducedMotion
+                ? false
+                : isCorrect
                 ? isBreathing
                   ? { rotate: [0, 22, 0] }
                   : { rotate: [0, 1, 0] }
@@ -197,13 +205,13 @@ export default function SwimmerRig({
           </motion.g>
         </motion.g>
 
-        <RhythmPulse playbackSpeed={playbackSpeed} />
-        {isTripleSwitch && <RhythmDots />}
-        {isRhythm && <RhythmPath />}
-        {isContinuousFlow && <ContinuousFlowOverlay />}
-        {isSPL && <SPLOutput />}
-        {isEffortless25 && <Effortless25Overlay />}
-        {isComparison && <ComparisonOverlay />}
+        <RhythmPulse playbackSpeed={playbackSpeed} reducedMotion={reducedMotion} />
+        {isTripleSwitch && <RhythmDots reducedMotion={reducedMotion} />}
+        {isRhythm && <RhythmPath reducedMotion={reducedMotion} />}
+        {isContinuousFlow && <ContinuousFlowOverlay reducedMotion={reducedMotion} />}
+        {isSPL && <SPLOutput reducedMotion={reducedMotion} />}
+        {isEffortless25 && <Effortless25Overlay reducedMotion={reducedMotion} />}
+        {isComparison && <ComparisonOverlay reducedMotion={reducedMotion} />}
       </svg>
     </motion.div>
   );

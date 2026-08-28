@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { DRILLS } from './data/drills';
 import useLessonProgress from './hooks/useLessonProgress';
 import useOnboarding from './hooks/useOnboarding';
-import useResponsiveMode from './hooks/useResponsiveMode';
 import useTelemetry from './hooks/useTelemetry';
 import usePerformanceMode from './hooks/usePerformanceMode';
 import useGuidedNarration from './hooks/useGuidedNarration';
@@ -38,16 +37,29 @@ export default function App() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [activeTag, setActiveTag] = useState(null);
 
-  const { progress: completed, markComplete: baseMarkComplete } = useLessonProgress({ superman: true });
+  const { progress: completed, markComplete: baseMarkComplete } = useLessonProgress({});
+  const celebrationTimeoutRef = useRef(null);
 
   const markComplete = useCallback((key) => {
     if (!completed[key]) {
       setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 2000);
+      if (celebrationTimeoutRef.current) {
+        clearTimeout(celebrationTimeoutRef.current);
+      }
+      celebrationTimeoutRef.current = setTimeout(() => {
+        setShowCelebration(false);
+        celebrationTimeoutRef.current = null;
+      }, 2000);
     }
     baseMarkComplete(key);
   }, [completed, baseMarkComplete]);
-  const { isMobile } = useResponsiveMode();
+
+  useEffect(() => () => {
+    if (celebrationTimeoutRef.current) {
+      clearTimeout(celebrationTimeoutRef.current);
+    }
+  }, []);
+
   const telemetry = useTelemetry(drill);
   const { reducedMotion } = usePerformanceMode();
   const { speakDrill } = useGuidedNarration(audioMode);
@@ -58,11 +70,11 @@ export default function App() {
     markComplete,
   });
 
-  const practiceTimer = usePracticeTimer(poolsideMode);
+  const practiceTimer = usePracticeTimer(poolsideMode && !showOnboarding);
 
   const currentDrill = DRILLS[drill];
   const isCorrect = mode === 'correct';
-  const effectivePlaybackSpeed = reducedMotion ? 0.5 : playbackSpeed;
+  const effectivePlaybackSpeed = playbackSpeed;
 
   useEffect(() => {
     speakDrill(drill);
@@ -106,7 +118,11 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 p-4 pb-28 text-white md:p-6 md:pb-6 transition-colors duration-700">
+    <MotionConfig reducedMotion="user">
+    <div
+      className="min-h-screen w-full bg-slate-950 p-4 pb-28 text-white md:p-6 md:pb-6 transition-colors duration-700"
+      data-reduced-motion={reducedMotion}
+    >
       <AnimatePresence>
         {showOnboarding && (
           <OnboardingModal onClose={closeOnboarding} />
@@ -121,6 +137,8 @@ export default function App() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.1 }}
               className="fixed left-1/2 top-1/4 z-[60] -translate-x-1/2 pointer-events-none"
+              role="status"
+              aria-live="polite"
             >
               <div className="rounded-full bg-cyan-400 px-8 py-3 text-lg font-bold text-slate-950 shadow-[0_0_40px_rgba(34,211,238,0.6)]">
                 Drill Mastered!
@@ -178,7 +196,7 @@ export default function App() {
             </button>
 
             <div className="rounded-2xl border border-cyan-100/10 bg-cyan-100/5 px-5 py-4 text-sm text-cyan-100">
-              {practiceStats.completedCount} drills explored
+              {practiceStats.completedCount} drills completed
             </div>
           </div>
         </motion.div>
@@ -189,7 +207,9 @@ export default function App() {
             sessionStep={guidedPractice.sessionStep}
             totalSteps={guidedPractice.totalSteps}
             onAdvance={guidedPractice.advance}
-            onRepeat={guidedPractice.repeat}
+            onComplete={guidedPractice.complete}
+            isCompleted={Boolean(completed[drill])}
+            isLastStep={guidedPractice.isLastStep}
           />
         )}
 
@@ -220,10 +240,17 @@ export default function App() {
           />
         </div>
 
-        <div className={`relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-cyan-800 via-sky-900 to-slate-950 shadow-2xl transition-all duration-500 ${focusMode ? 'h-[80vh] shadow-[0_0_50px_rgba(0,0,0,0.5)]' : ''}`}>
-          <WaterBackground playbackSpeed={effectivePlaybackSpeed} focusMode={focusMode} />
+        <div
+          className={`relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-cyan-800 via-sky-900 to-slate-950 shadow-2xl transition-all duration-500 ${focusMode ? 'h-[calc(100dvh-7rem)] min-h-[420px] shadow-[0_0_50px_rgba(0,0,0,0.5)]' : 'h-[clamp(460px,68dvh,620px)]'}`}
+          data-testid="visualization"
+        >
+          <WaterBackground
+            playbackSpeed={effectivePlaybackSpeed}
+            focusMode={focusMode}
+            reducedMotion={reducedMotion}
+          />
 
-          <div className={isMobile ? 'relative h-[620px]' : 'relative h-[620px]'}>
+          <div className="relative h-full">
             <AnimatePresence mode="wait">
               <motion.div
                 key={drill}
@@ -233,12 +260,13 @@ export default function App() {
                 transition={{ duration: 0.5, ease: 'easeOut' }}
                 className="absolute inset-0"
               >
-                <GhostSwimmer enabled={ghostMode} />
+                <GhostSwimmer enabled={ghostMode} reducedMotion={reducedMotion} />
 
                 <OverlayLayer
                   drill={drill}
                   showGuides={showGuides}
                   isCorrect={isCorrect}
+                  reducedMotion={reducedMotion}
                 />
 
                 <SwimmerRig
@@ -247,18 +275,19 @@ export default function App() {
                   showGuides={showGuides}
                   playbackSpeed={effectivePlaybackSpeed}
                   activeTag={activeTag}
+                  reducedMotion={reducedMotion}
                 />
               </motion.div>
             </AnimatePresence>
 
-            <div className="absolute bottom-6 left-6 right-6 grid gap-3 md:grid-cols-4">
+            <div className="absolute bottom-4 left-4 right-4 grid grid-cols-2 gap-2 md:bottom-6 md:left-6 md:right-6 md:grid-cols-4 md:gap-3">
               {currentDrill.tags.map((item) => (
                 <motion.button
                   key={item}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveTag(activeTag === item ? null : item)}
-                  className={`rounded-2xl border p-4 text-left backdrop-blur transition-all ${
+                  className={`rounded-2xl border p-3 text-left backdrop-blur transition-all md:p-4 ${
                     activeTag === item
                       ? 'border-cyan-300 bg-cyan-400/20 shadow-[0_0_20px_rgba(34,211,238,0.2)]'
                       : 'border-white/10 bg-slate-950/35 hover:bg-slate-900/50'
@@ -300,7 +329,6 @@ export default function App() {
                 drill={drill}
                 setDrill={setDrill}
                 completed={completed}
-                markComplete={markComplete}
               />
             </motion.div>
           )}
@@ -314,5 +342,6 @@ export default function App() {
         />
       )}
     </div>
+    </MotionConfig>
   );
 }

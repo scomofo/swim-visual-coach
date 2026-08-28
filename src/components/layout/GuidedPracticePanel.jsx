@@ -5,7 +5,9 @@ export default function GuidedPracticePanel({
   sessionStep,
   totalSteps,
   onAdvance,
-  onRepeat,
+  onComplete,
+  isCompleted,
+  isLastStep,
 }) {
   const progress = (sessionStep / totalSteps) * 100;
 
@@ -34,17 +36,19 @@ export default function GuidedPracticePanel({
 
           <div className="flex gap-3">
             <button
-              onClick={onRepeat}
-              className="rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm text-white transition hover:bg-white/20"
+              onClick={onComplete}
+              disabled={isCompleted}
+              className="rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Repeat Drill
+              {isCompleted ? 'Drill Completed' : 'Complete Drill'}
             </button>
 
             <button
               onClick={onAdvance}
-              className="rounded-2xl bg-cyan-100 px-5 py-3 text-sm font-medium text-slate-950 transition hover:bg-white"
+              disabled={isLastStep}
+              className="rounded-2xl bg-cyan-100 px-5 py-3 text-sm font-medium text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Advance
+              {isLastStep ? 'Final Step' : 'Advance'}
             </button>
           </div>
         </div>

@@ -1,12 +1,19 @@
 import { motion } from 'framer-motion';
 
-export default function WaterBackground({ playbackSpeed = 1, focusMode = false }) {
+export default function WaterBackground({
+  playbackSpeed = 1,
+  focusMode = false,
+  reducedMotion = false,
+}) {
   return (
-    <div className="absolute inset-0 overflow-hidden bg-slate-950">
+    <div
+      className="absolute inset-0 overflow-hidden bg-slate-950"
+      data-motion={reducedMotion ? 'static' : 'animated'}
+    >
       {/* Deep water gradient */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-b from-cyan-900/40 via-sky-950 to-slate-950"
-        animate={{
+        animate={reducedMotion ? false : {
           opacity: focusMode ? 0.8 : 1,
           scale: focusMode ? [1, 1.05, 1] : 1,
         }}
@@ -20,7 +27,7 @@ export default function WaterBackground({ playbackSpeed = 1, focusMode = false }
       {/* Animated Caustics Layer 1 */}
       <motion.div
         className="absolute inset-0 opacity-20"
-        animate={{
+        animate={reducedMotion ? false : {
           backgroundPosition: ['0% 0%', '100% 100%'],
           scale: [1, 1.1, 1],
         }}
@@ -39,7 +46,7 @@ export default function WaterBackground({ playbackSpeed = 1, focusMode = false }
       {/* Animated Caustics Layer 2 (Faster, for depth) */}
       <motion.div
         className="absolute inset-0 opacity-10"
-        animate={{
+        animate={reducedMotion ? false : {
           backgroundPosition: ['100% 100%', '0% 0%'],
           rotate: [0, 5, 0],
         }}
@@ -65,7 +72,7 @@ export default function WaterBackground({ playbackSpeed = 1, focusMode = false }
       {/* Subtle floating particles */}
       <motion.div
         className="absolute inset-0"
-        animate={{ backgroundPositionX: ['0%', '100%'] }}
+        animate={reducedMotion ? false : { backgroundPositionX: ['0%', '100%'] }}
         transition={{
           duration: 25 / playbackSpeed,
           repeat: Infinity,

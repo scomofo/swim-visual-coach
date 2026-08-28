@@ -8,6 +8,18 @@ Interactive visual coaching system for Total Immersion freestyle instruction.
 - Vite
 - TailwindCSS
 - Framer Motion
+- Vitest + React Testing Library
+
+## Development checks
+
+```bash
+npm ci
+npm run lint
+npm test
+npm run build
+```
+
+Pull requests run the full check suite on Node.js 20 and 22.
 
 ## Features
 

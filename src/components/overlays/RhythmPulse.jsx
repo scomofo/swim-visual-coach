@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export default function RhythmPulse({ playbackSpeed = 1 }) {
+export default function RhythmPulse({ playbackSpeed = 1, reducedMotion = false }) {
   return (
     <motion.g>
       {/* Visual pulse around the core/head area to represent patient timing */}
@@ -11,7 +11,7 @@ export default function RhythmPulse({ playbackSpeed = 1 }) {
         fill="none"
         stroke="rgba(103, 232, 249, 0.4)"
         strokeWidth="2"
-        animate={{
+        animate={reducedMotion ? false : {
           r: [45, 75],
           opacity: [0.6, 0],
         }}
@@ -29,7 +29,7 @@ export default function RhythmPulse({ playbackSpeed = 1 }) {
         fill="none"
         stroke="rgba(103, 232, 249, 0.2)"
         strokeWidth="1"
-        animate={{
+        animate={reducedMotion ? false : {
           r: [45, 90],
           opacity: [0.4, 0],
         }}

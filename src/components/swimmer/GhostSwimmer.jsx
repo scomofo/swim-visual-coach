@@ -1,17 +1,17 @@
 import { motion } from 'framer-motion';
 
-export default function GhostSwimmer({ enabled = true }) {
+export default function GhostSwimmer({ enabled = true, reducedMotion = false }) {
   if (!enabled) return null;
 
   return (
     <motion.div
       className="absolute inset-0 opacity-20"
-      animate={{ opacity: [0.06, 0.22, 0.06] }}
+      animate={reducedMotion ? false : { opacity: [0.06, 0.22, 0.06] }}
       transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
     >
       <svg
         viewBox="0 0 900 240"
-        className="absolute left-[8%] top-[34%] h-[190px] w-[78%] overflow-visible"
+        className="absolute left-[8%] top-[28%] h-[150px] w-[78%] overflow-visible md:top-[34%] md:h-[190px]"
       >
         <path
           d="M230 128 C165 126, 108 121, 52 112"

@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 
-export default function ContinuousFlowOverlay() {
+export default function ContinuousFlowOverlay({ reducedMotion = false }) {
   return (
     <motion.g
-      animate={{ opacity: [0.2, 1, 0.2] }}
+      animate={reducedMotion ? false : { opacity: [0.2, 1, 0.2] }}
       transition={{ duration: 5, repeat: Infinity }}
     >
       <path

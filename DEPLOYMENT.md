@@ -10,6 +10,8 @@ npm run dev
 ## Production Build
 
 ```bash
+npm run lint
+npm test
 npm run build
 ```
 
@@ -28,7 +30,7 @@ npm run build
 
 ## Recommended Environment
 
-- Node.js 20+
+- Node.js 20 or 22
 - Modern Chromium-based browser
 - Hardware acceleration enabled
 

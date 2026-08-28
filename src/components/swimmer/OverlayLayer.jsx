@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export default function OverlayLayer({ showGuides, isCorrect }) {
+export default function OverlayLayer({ showGuides, isCorrect, reducedMotion = false }) {
   if (!showGuides) return null;
 
   return (
@@ -8,7 +8,7 @@ export default function OverlayLayer({ showGuides, isCorrect }) {
       <motion.div
         className="absolute left-[14%] right-[14%] top-[45%] h-px bg-cyan-100/70"
         initial={{ opacity: 0 }}
-        animate={{ opacity: [0.25, 0.75, 0.25] }}
+        animate={reducedMotion ? false : { opacity: [0.25, 0.75, 0.25] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
       />
 

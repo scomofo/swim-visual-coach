@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'swim-visual-coach-progress';
+// Version the key because v1 marked drills complete when they were only opened.
+const STORAGE_KEY = 'swim-visual-coach-progress-v2';
 
 export default function useLessonProgress(initial = {}) {
   const [progress, setProgress] = useState(() => {

@@ -1,4 +1,4 @@
-const GUIDED_SEQUENCE = [
+export const GUIDED_SEQUENCE = [
   'superman',
   'flutter',
   'chestPress',
@@ -10,6 +10,7 @@ const GUIDED_SEQUENCE = [
   'continuousFlow',
   'spl',
   'effortless25',
+  'comparison',
 ];
 
 export default function useGuidedPractice({
@@ -18,17 +19,17 @@ export default function useGuidedPractice({
   markComplete,
 }) {
   const currentIndex = GUIDED_SEQUENCE.indexOf(drill);
+  const isLastStep = currentIndex === GUIDED_SEQUENCE.length - 1;
 
   const advance = () => {
-    if (currentIndex >= GUIDED_SEQUENCE.length - 1) return;
+    if (currentIndex < 0 || isLastStep) return;
 
     const nextDrill = GUIDED_SEQUENCE[currentIndex + 1];
 
     setDrill(nextDrill);
-    markComplete(nextDrill);
   };
 
-  const repeat = () => {
+  const complete = () => {
     markComplete(drill);
   };
 
@@ -36,6 +37,7 @@ export default function useGuidedPractice({
     sessionStep: currentIndex + 1,
     totalSteps: GUIDED_SEQUENCE.length,
     advance,
-    repeat,
+    complete,
+    isLastStep,
   };
 }

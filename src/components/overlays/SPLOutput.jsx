@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 
-export default function SPLOutput() {
+export default function SPLOutput({ reducedMotion = false }) {
   return (
     <motion.g
-      animate={{ opacity: [0.2, 1, 0.2] }}
+      animate={reducedMotion ? false : { opacity: [0.2, 1, 0.2] }}
       transition={{ duration: 4, repeat: Infinity }}
     >
       <rect

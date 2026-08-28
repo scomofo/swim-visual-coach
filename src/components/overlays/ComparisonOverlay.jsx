@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 
-export default function ComparisonOverlay() {
+export default function ComparisonOverlay({ reducedMotion = false }) {
   return (
     <motion.g
-      animate={{ opacity: [0.2, 1, 0.2] }}
+      animate={reducedMotion ? false : { opacity: [0.2, 1, 0.2] }}
       transition={{ duration: 3.5, repeat: Infinity }}
     >
       <line

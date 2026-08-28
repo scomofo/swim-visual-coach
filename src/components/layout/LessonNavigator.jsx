@@ -4,7 +4,6 @@ export default function LessonNavigator({
   drill,
   setDrill,
   completed,
-  markComplete,
 }) {
   return (
     <div className="mt-5 rounded-[2rem] border border-white/10 bg-white/5 p-5">
@@ -29,10 +28,7 @@ export default function LessonNavigator({
         {DRILL_ORDER.map((key, index) => (
           <button
             key={key}
-            onClick={() => {
-              setDrill(key);
-              markComplete(key);
-            }}
+            onClick={() => setDrill(key)}
             className={`rounded-2xl border p-4 text-left transition ${
               drill === key
                 ? 'border-cyan-200/60 bg-cyan-100/15'

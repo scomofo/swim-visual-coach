@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 
-export default function RhythmDots() {
+export default function RhythmDots({ reducedMotion = false }) {
   return (
     <motion.g
-      animate={{ opacity: [0.2, 1, 0.2] }}
+      animate={reducedMotion ? false : { opacity: [0.2, 1, 0.2] }}
       transition={{ duration: 1.8, repeat: Infinity }}
     >
       <circle

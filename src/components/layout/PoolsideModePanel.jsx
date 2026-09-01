@@ -1,12 +1,16 @@
 import { motion } from 'framer-motion';
+import { strokeTempo } from '../../data/drillMotion';
 
 export default function PoolsideModePanel({
   timer,
   currentDrill,
+  drill,
+  playbackSpeed = 1,
   guidedMode,
   onPause,
   onResume,
 }) {
+  const tempo = strokeTempo(drill) * playbackSpeed;
   const minutes = Math.floor(timer.seconds / 60)
     .toString()
     .padStart(2, '0');
@@ -58,6 +62,18 @@ export default function PoolsideModePanel({
             <div className="mt-3 font-mono text-7xl font-bold tracking-tighter text-cyan-400">
               {minutes}:{seconds}
             </div>
+
+            {tempo > 0 && (
+              <div className="mt-5 flex items-center justify-center gap-2.5">
+                <span
+                  className="h-[11px] w-[11px] rounded-full bg-cyan-400"
+                  style={{ animation: `tempo-beat ${(1 / tempo).toFixed(2)}s cubic-bezier(.3,0,.5,1) infinite` }}
+                />
+                <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-500/70">
+                  Stroke tempo
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="flex w-full gap-4 lg:w-auto">

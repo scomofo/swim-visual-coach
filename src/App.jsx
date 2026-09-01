@@ -9,10 +9,8 @@ import useGuidedNarration from './hooks/useGuidedNarration';
 import useGuidedPractice from './hooks/useGuidedPractice';
 import usePracticeTimer from './hooks/usePracticeTimer';
 import { exportLessonData } from './utils/exportLessons';
-import WaterBackground from './components/swimmer/WaterBackground';
-import GhostSwimmer from './components/swimmer/GhostSwimmer';
+import SwimmerScene from './components/swimmer/SwimmerScene';
 import OverlayLayer from './components/swimmer/OverlayLayer';
-import SwimmerRig from './components/swimmer/SwimmerRig';
 import PlaybackControls from './components/layout/PlaybackControls';
 import CoachingPanel from './components/layout/CoachingPanel';
 import LessonNavigator from './components/layout/LessonNavigator';
@@ -217,6 +215,8 @@ export default function App() {
           <PoolsideModePanel
             timer={practiceTimer}
             currentDrill={currentDrill}
+            drill={drill}
+            playbackSpeed={effectivePlaybackSpeed}
             guidedMode={guidedMode}
             onPause={() => practiceTimer.setRunning(false)}
             onResume={() => practiceTimer.setRunning(true)}
@@ -244,41 +244,22 @@ export default function App() {
           className={`relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-cyan-800 via-sky-900 to-slate-950 shadow-2xl transition-all duration-500 ${focusMode ? 'h-[calc(100dvh-7rem)] min-h-[420px] shadow-[0_0_50px_rgba(0,0,0,0.5)]' : 'h-[clamp(460px,68dvh,620px)]'}`}
           data-testid="visualization"
         >
-          <WaterBackground
+          <SwimmerScene
+            drill={drill}
+            isCorrect={isCorrect}
+            showGuides={showGuides}
+            ghostMode={ghostMode}
             playbackSpeed={effectivePlaybackSpeed}
-            focusMode={focusMode}
+            activeTag={activeTag}
             reducedMotion={reducedMotion}
           />
 
           <div className="relative h-full">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={drill}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="absolute inset-0"
-              >
-                <GhostSwimmer enabled={ghostMode} reducedMotion={reducedMotion} />
-
-                <OverlayLayer
-                  drill={drill}
-                  showGuides={showGuides}
-                  isCorrect={isCorrect}
-                  reducedMotion={reducedMotion}
-                />
-
-                <SwimmerRig
-                  drill={drill}
-                  isCorrect={isCorrect}
-                  showGuides={showGuides}
-                  playbackSpeed={effectivePlaybackSpeed}
-                  activeTag={activeTag}
-                  reducedMotion={reducedMotion}
-                />
-              </motion.div>
-            </AnimatePresence>
+            <OverlayLayer
+              drill={drill}
+              showGuides={showGuides}
+              isCorrect={isCorrect}
+            />
 
             <div className="absolute bottom-4 left-4 right-4 grid grid-cols-2 gap-2 md:bottom-6 md:left-6 md:right-6 md:grid-cols-4 md:gap-3">
               {currentDrill.tags.map((item) => (

@@ -20,6 +20,16 @@ Object.defineProperty(window, 'matchMedia', {
   value: createMatchMedia(false),
 });
 
+// jsdom ships no ResizeObserver; SwimmerScene uses one to size its SVG viewBox.
+Object.defineProperty(window, 'ResizeObserver', {
+  writable: true,
+  value: class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  },
+});
+
 Object.defineProperty(window, 'scrollTo', {
   writable: true,
   value: vi.fn(),

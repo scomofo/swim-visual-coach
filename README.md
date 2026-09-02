@@ -8,6 +8,7 @@ Interactive visual coaching system for Total Immersion freestyle instruction.
 - Vite
 - TailwindCSS
 - Framer Motion
+- React Three Fiber
 - Vitest + React Testing Library
 
 ## Development checks
@@ -23,12 +24,13 @@ Pull requests run the full check suite on Node.js 20 and 22.
 
 ## Features
 
-- Animated freestyle drill system
-- Ghost swimmer overlays
+- 3D lane with a skeletal freestyle swimmer
+- Correct vs common-error motion profiles
+- Ghost overlay and side-by-side comparison
+- Hydrodynamic drag readout (form, wave, skin)
 - Interactive lesson progression
-- Stroke efficiency visualization
 - Breathing and rhythm coaching
-- Playback controls
+- Playback, camera, and guide controls
 - Adaptive coaching scaffolding
 - Export-ready lesson cards
 
@@ -46,6 +48,16 @@ Pull requests run the full check suite on Node.js 20 and 22.
 10. Stroke Count Efficiency
 11. Effortless 25
 12. Efficient vs Rushed
+
+## Hydrodynamic drag
+
+The lane scores three sources of drag on every frame:
+
+- **Form** — the hole the body punches (head lift, hanging hips, wide recovery)
+- **Wave** — splash, bounce, and bow wave
+- **Skin** — extra friction from thrashy kicking
+
+Quiet water is the tell. Switch **Correct** and **Common Error**, then use **Head-on** to see the frontal plate.
 
 ## Future Systems
 

@@ -10,10 +10,10 @@ import useGuidedPractice from './hooks/useGuidedPractice';
 import usePracticeTimer from './hooks/usePracticeTimer';
 import { exportLessonData } from './utils/exportLessons';
 import WaterBackground from './components/swimmer/WaterBackground';
-import GhostSwimmer from './components/swimmer/GhostSwimmer';
 import OverlayLayer from './components/swimmer/OverlayLayer';
-import SwimmerRig from './components/swimmer/SwimmerRig';
+import LaneView from './components/pool/LaneView';
 import PlaybackControls from './components/layout/PlaybackControls';
+import DragMeter from './components/layout/DragMeter';
 import CoachingPanel from './components/layout/CoachingPanel';
 import LessonNavigator from './components/layout/LessonNavigator';
 import MobilePracticeBar from './components/layout/MobilePracticeBar';
@@ -30,6 +30,8 @@ export default function App() {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [mode, setMode] = useState('correct');
   const [drill, setDrill] = useState('superman');
+  const [camera, setCamera] = useState('quarter');
+  const [hudDrag, setHudDrag] = useState(null);
   const [guidedMode, setGuidedMode] = useState(true);
   const [poolsideMode, setPoolsideMode] = useState(true);
   const [focusMode, setFocusMode] = useState(false);
@@ -237,6 +239,9 @@ export default function App() {
             setMode={setMode}
             focusMode={focusMode}
             setFocusMode={setFocusMode}
+            camera={camera}
+            setCamera={setCamera}
+            dragTotal={hudDrag?.total ?? 0}
           />
         </div>
 
@@ -260,7 +265,17 @@ export default function App() {
                 transition={{ duration: 0.5, ease: 'easeOut' }}
                 className="absolute inset-0"
               >
-                <GhostSwimmer enabled={ghostMode} reducedMotion={reducedMotion} />
+                <LaneView
+                  drill={drill}
+                  mode={mode}
+                  ghostMode={ghostMode}
+                  showGuides={showGuides}
+                  playbackSpeed={effectivePlaybackSpeed}
+                  camera={camera}
+                  activeTag={activeTag}
+                  reducedMotion={reducedMotion}
+                  onHud={(drag) => setHudDrag(drag)}
+                />
 
                 <OverlayLayer
                   drill={drill}
@@ -268,17 +283,10 @@ export default function App() {
                   isCorrect={isCorrect}
                   reducedMotion={reducedMotion}
                 />
-
-                <SwimmerRig
-                  drill={drill}
-                  isCorrect={isCorrect}
-                  showGuides={showGuides}
-                  playbackSpeed={effectivePlaybackSpeed}
-                  activeTag={activeTag}
-                  reducedMotion={reducedMotion}
-                />
               </motion.div>
             </AnimatePresence>
+
+            <DragMeter drag={hudDrag} compare={drill === 'comparison'} />
 
             <div className="absolute bottom-4 left-4 right-4 grid grid-cols-2 gap-2 md:bottom-6 md:left-6 md:right-6 md:grid-cols-4 md:gap-3">
               {currentDrill.tags.map((item) => (

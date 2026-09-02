@@ -4,7 +4,7 @@ export default function OverlayLayer({ showGuides, isCorrect, reducedMotion = fa
   if (!showGuides) return null;
 
   return (
-    <>
+    <div data-motion={reducedMotion ? 'static' : 'animated'}>
       <motion.div
         className="absolute left-[14%] right-[14%] top-[45%] h-px bg-cyan-100/70"
         initial={{ opacity: 0 }}
@@ -17,6 +17,6 @@ export default function OverlayLayer({ showGuides, isCorrect, reducedMotion = fa
           ? 'long, quiet bodyline'
           : 'lifted head + sinking legs'}
       </div>
-    </>
+    </div>
   );
 }

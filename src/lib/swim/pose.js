@@ -228,7 +228,7 @@ function evaluatePose(profile, time, zLane = 0) {
   };
 }
 function wrapLaneX(x) {
-  return LANE_START + (x - LANE_START) % LANE_LENGTH;
+  return LANE_START + (((x - LANE_START) % LANE_LENGTH + LANE_LENGTH) % LANE_LENGTH);
 }
 export {
   LANE_LENGTH,

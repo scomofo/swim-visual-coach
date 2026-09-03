@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { evaluateDrag } from '../../lib/swim/drag';
@@ -61,14 +61,14 @@ function Scene({
     if (!reducedMotion) clock.current += d * playbackSpeed;
   }, -1);
 
-  const publishHud = (phase, spl, pose) => {
+  const publishHud = useCallback((phase, spl, pose) => {
     hudTick.current += 1;
     if (hudTick.current % 8 !== 0) return;
     const other = compare
       ? evaluateDrag(errorProfile, evaluatePose(errorProfile, clock.current, 0.72)).total
       : null;
     onHud?.(evaluateDrag(mainProfile, pose, other), phase, spl);
-  };
+  }, [compare, errorProfile, mainProfile, onHud]);
 
   return (
     <>

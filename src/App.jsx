@@ -66,9 +66,15 @@ export default function App() {
   const { reducedMotion } = usePerformanceMode();
   const { speakDrill } = useGuidedNarration(audioMode);
 
+  // Clear tag highlights at the source of drill changes (no reset effect needed)
+  const handleSetDrill = useCallback((next) => {
+    setActiveTag(null);
+    setDrill(next);
+  }, []);
+
   const guidedPractice = useGuidedPractice({
     drill,
-    setDrill,
+    setDrill: handleSetDrill,
     markComplete,
   });
 
@@ -82,13 +88,6 @@ export default function App() {
     speakDrill(drill);
   }, [drill, speakDrill]);
 
-  // Reset active tag when drill changes
-  const [prevDrill, setPrevDrill] = useState(drill);
-  if (drill !== prevDrill) {
-    setPrevDrill(drill);
-    setActiveTag(null);
-  }
-
   const practiceStats = useMemo(() => {
     const completedCount = Object.values(completed).filter(Boolean).length;
 
@@ -97,12 +96,16 @@ export default function App() {
     };
   }, [completed]);
 
-  const localMetrics = {
+  const localMetrics = useMemo(() => ({
     ...telemetry,
     reducedMotion,
-  };
+  }), [telemetry, reducedMotion]);
 
-  const handleExport = () => {
+  const handleHud = useCallback((drag) => {
+    setHudDrag(drag);
+  }, []);
+
+  const handleExport = useCallback(() => {
     exportLessonData({
       drill,
       progress: completed,
@@ -117,7 +120,7 @@ export default function App() {
         poolsideMode,
       },
     });
-  };
+  }, [drill, completed, showGuides, ghostMode, audioMode, effectivePlaybackSpeed, mode, reducedMotion, guidedMode, poolsideMode]);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -274,7 +277,7 @@ export default function App() {
                   camera={camera}
                   activeTag={activeTag}
                   reducedMotion={reducedMotion}
-                  onHud={(drag) => setHudDrag(drag)}
+                  onHud={handleHud}
                 />
 
                 <OverlayLayer
@@ -335,7 +338,7 @@ export default function App() {
 
               <LessonNavigator
                 drill={drill}
-                setDrill={setDrill}
+                setDrill={handleSetDrill}
                 completed={completed}
               />
             </motion.div>

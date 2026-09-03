@@ -1,12 +1,4 @@
-const IDLE = {
-  form: 0.12,
-  wave: 0.08,
-  skin: 0.1,
-  total: 0.1,
-  label: 'Quiet',
-  note: 'The water stays almost still.',
-  otherTotal: null,
-};
+import { IDLE_DRAG } from '../../lib/swim/drag';
 
 function Bar({ label, value, hint }) {
   const hot = value > 0.55;
@@ -29,7 +21,7 @@ function Bar({ label, value, hint }) {
 }
 
 export default function DragMeter({ drag, compare = false }) {
-  const report = drag ?? IDLE;
+  const report = drag ?? IDLE_DRAG;
   const pct = Math.round((report.total ?? 0) * 100);
   return (
     <aside

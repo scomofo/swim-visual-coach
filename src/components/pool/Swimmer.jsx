@@ -107,6 +107,7 @@ function Swimmer({
   const bind = (name) => (node) => {
     if (node) joints.current[name] = node;
   };
+  const lastCue = useRef(Symbol("init"));
   useFrame(() => {
     const j = joints.current;
     if (!j.root || !j.hips) return;
@@ -115,17 +116,21 @@ function Swimmer({
     if (target && !ghost) {
       target.current.set(pose.x + 0.4, pose.y + 0.04, pose.z);
     }
-    setHighlight(
-      [headMat, chestMat, hipMat, armMat, kickMat, cap],
-      ghost ? null : highlight,
-      {
-        head: [headMat, cap],
-        chest: [chestMat],
-        hips: [hipMat],
-        arm: [armMat],
-        kick: [kickMat]
-      }
-    );
+    const cue = ghost ? null : highlight;
+    if (cue !== lastCue.current) {
+      lastCue.current = cue;
+      setHighlight(
+        [headMat, chestMat, hipMat, armMat, kickMat, cap],
+        cue,
+        {
+          head: [headMat, cap],
+          chest: [chestMat],
+          hips: [hipMat],
+          arm: [armMat],
+          kick: [kickMat]
+        }
+      );
+    }
     onHud?.(pose.phaseName, profile.spl, pose);
   });
   return <group ref={bind("root")} position={[6.2, 0.12, 0]} scale={1.14} renderOrder={2}>

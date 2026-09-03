@@ -72,13 +72,14 @@ const floorFrag = (
   }
 `
 );
-function Water() {
+function Water({ reducedMotion = false, playbackSpeed = 1 } = {}) {
   const waterMat = useRef(null);
   const floorMat = useRef(null);
   const waterUniforms = useMemo(() => ({ uTime: { value: 0 } }), []);
   const floorUniforms = useMemo(() => ({ uTime: { value: 0 } }), []);
   useFrame((_, dt) => {
-    const d = Math.min(dt, 0.1);
+    if (reducedMotion) return;
+    const d = Math.min(dt, 0.1) * playbackSpeed;
     if (waterMat.current) waterMat.current.uniforms.uTime.value += d;
     if (floorMat.current) floorMat.current.uniforms.uTime.value += d;
   });

@@ -6,6 +6,8 @@ const CAMERAS = [
   { id: 'under', label: 'Under' },
 ];
 
+import { useHudDrag } from '../../state/hudStore';
+
 export default function PlaybackControls({
   playbackSpeed,
   setPlaybackSpeed,
@@ -21,8 +23,10 @@ export default function PlaybackControls({
   setFocusMode,
   camera = 'quarter',
   setCamera,
-  dragTotal = 0,
+  dragTotal = null,
 }) {
+  const storeDrag = useHudDrag();
+  const effectiveDragTotal = dragTotal ?? storeDrag?.total ?? 0;
   return (
     <div className="rounded-3xl border border-white/10 bg-slate-950/45 p-4 backdrop-blur">
       <div className="flex flex-wrap items-center gap-2">
@@ -95,7 +99,7 @@ export default function PlaybackControls({
         ))}
 
         <span className="ml-auto rounded-2xl bg-white/10 px-4 py-2 text-sm tabular-nums text-cyan-100">
-          Drag {Math.round(dragTotal * 100)}
+          Drag {Math.round(effectiveDragTotal * 100)}
         </span>
       </div>
 

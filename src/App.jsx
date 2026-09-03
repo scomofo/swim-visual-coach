@@ -1,14 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
-import { DRILLS } from './data/drills';
-import useLessonProgress from './hooks/useLessonProgress';
-import useOnboarding from './hooks/useOnboarding';
-import useTelemetry from './hooks/useTelemetry';
-import usePerformanceMode from './hooks/usePerformanceMode';
-import useGuidedNarration from './hooks/useGuidedNarration';
-import useGuidedPractice from './hooks/useGuidedPractice';
-import usePracticeTimer from './hooks/usePracticeTimer';
-import { exportLessonData } from './utils/exportLessons';
+import useCoachControls from './hooks/useCoachControls';
 import WaterBackground from './components/swimmer/WaterBackground';
 import OverlayLayer from './components/swimmer/OverlayLayer';
 import LaneView from './components/pool/LaneView';
@@ -24,103 +15,27 @@ import PoolsideModePanel from './components/layout/PoolsideModePanel';
 import OnboardingModal from './components/layout/OnboardingModal';
 
 export default function App() {
-  const [showGuides, setShowGuides] = useState(true);
-  const [ghostMode, setGhostMode] = useState(true);
-  const [audioMode, setAudioMode] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [mode, setMode] = useState('correct');
-  const [drill, setDrill] = useState('superman');
-  const [camera, setCamera] = useState('quarter');
-  const [hudDrag, setHudDrag] = useState(null);
-  const [guidedMode, setGuidedMode] = useState(true);
-  const [poolsideMode, setPoolsideMode] = useState(true);
-  const [focusMode, setFocusMode] = useState(false);
-  const { showOnboarding, closeOnboarding } = useOnboarding();
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [activeTag, setActiveTag] = useState(null);
-
-  const { progress: completed, markComplete: baseMarkComplete } = useLessonProgress({});
-  const celebrationTimeoutRef = useRef(null);
-
-  const markComplete = useCallback((key) => {
-    if (!completed[key]) {
-      setShowCelebration(true);
-      if (celebrationTimeoutRef.current) {
-        clearTimeout(celebrationTimeoutRef.current);
-      }
-      celebrationTimeoutRef.current = setTimeout(() => {
-        setShowCelebration(false);
-        celebrationTimeoutRef.current = null;
-      }, 2000);
-    }
-    baseMarkComplete(key);
-  }, [completed, baseMarkComplete]);
-
-  useEffect(() => () => {
-    if (celebrationTimeoutRef.current) {
-      clearTimeout(celebrationTimeoutRef.current);
-    }
-  }, []);
-
-  const telemetry = useTelemetry(drill);
-  const { reducedMotion } = usePerformanceMode();
-  const { speakDrill } = useGuidedNarration(audioMode);
-
-  // Clear tag highlights at the source of drill changes (no reset effect needed)
-  const handleSetDrill = useCallback((next) => {
-    setActiveTag(null);
-    setDrill(next);
-  }, []);
-
-  const guidedPractice = useGuidedPractice({
-    drill,
-    setDrill: handleSetDrill,
-    markComplete,
-  });
-
-  const practiceTimer = usePracticeTimer(poolsideMode && !showOnboarding);
-
-  const currentDrill = DRILLS[drill];
-  const isCorrect = mode === 'correct';
-  const effectivePlaybackSpeed = playbackSpeed;
-
-  useEffect(() => {
-    speakDrill(drill);
-  }, [drill, speakDrill]);
-
-  const practiceStats = useMemo(() => {
-    const completedCount = Object.values(completed).filter(Boolean).length;
-
-    return {
-      completedCount,
-    };
-  }, [completed]);
-
-  const localMetrics = useMemo(() => ({
-    ...telemetry,
+  const {
+    showGuides, setShowGuides,
+    ghostMode, setGhostMode,
+    audioMode, setAudioMode,
+    playbackSpeed, setPlaybackSpeed,
+    mode, setMode,
+    drill, setDrill: handleSetDrill,
+    camera, setCamera,
+    guidedMode, setGuidedMode,
+    poolsideMode, setPoolsideMode,
+    focusMode, setFocusMode,
+    showOnboarding, closeOnboarding,
+    showCelebration,
+    activeTag, setActiveTag,
+    completed,
     reducedMotion,
-  }), [telemetry, reducedMotion]);
-
-  const handleHud = useCallback((drag) => {
-    setHudDrag(drag);
-  }, []);
-
-  const handleExport = useCallback(() => {
-    exportLessonData({
-      drill,
-      progress: completed,
-      settings: {
-        showGuides,
-        ghostMode,
-        audioMode,
-        playbackSpeed: effectivePlaybackSpeed,
-        mode,
-        reducedMotion,
-        guidedMode,
-        poolsideMode,
-      },
-    });
-  }, [drill, completed, showGuides, ghostMode, audioMode, effectivePlaybackSpeed, mode, reducedMotion, guidedMode, poolsideMode]);
+    guidedPractice, practiceTimer,
+    currentDrill, isCorrect,
+    practiceStats, localMetrics,
+    handleExport,
+  } = useCoachControls();
 
   return (
     <MotionConfig reducedMotion="user">
@@ -244,7 +159,6 @@ export default function App() {
             setFocusMode={setFocusMode}
             camera={camera}
             setCamera={setCamera}
-            dragTotal={hudDrag?.total ?? 0}
           />
         </div>
 
@@ -253,7 +167,7 @@ export default function App() {
           data-testid="visualization"
         >
           <WaterBackground
-            playbackSpeed={effectivePlaybackSpeed}
+            playbackSpeed={playbackSpeed}
             focusMode={focusMode}
             reducedMotion={reducedMotion}
           />
@@ -273,11 +187,10 @@ export default function App() {
                   mode={mode}
                   ghostMode={ghostMode}
                   showGuides={showGuides}
-                  playbackSpeed={effectivePlaybackSpeed}
+                  playbackSpeed={playbackSpeed}
                   camera={camera}
                   activeTag={activeTag}
                   reducedMotion={reducedMotion}
-                  onHud={handleHud}
                 />
 
                 <OverlayLayer
@@ -289,7 +202,7 @@ export default function App() {
               </motion.div>
             </AnimatePresence>
 
-            <DragMeter drag={hudDrag} compare={drill === 'comparison'} />
+            <DragMeter compare={drill === 'comparison'} />
 
             <div className="absolute bottom-4 left-4 right-4 grid grid-cols-2 gap-2 md:bottom-6 md:left-6 md:right-6 md:grid-cols-4 md:gap-3">
               {currentDrill.tags.map((item) => (
@@ -324,7 +237,7 @@ export default function App() {
             >
               <SessionStatsPanel
                 completedCount={practiceStats.completedCount}
-                playbackSpeed={effectivePlaybackSpeed}
+                playbackSpeed={playbackSpeed}
                 audioMode={audioMode}
               />
 

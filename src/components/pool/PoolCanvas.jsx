@@ -1,9 +1,10 @@
-import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Suspense, memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { evaluateDrag } from '../../lib/swim/drag';
-import { evaluatePose } from '../../lib/swim/pose';
 import { getProfile } from '../../lib/swim/profiles';
+import { createSimCache } from '../../lib/swim/simCache';
+import { publishHudDrag } from '../../state/hudStore';
 import { Swimmer } from './Swimmer';
 import { Water } from './Water';
 import { Lights, PoolEnv } from './PoolEnv';
@@ -24,7 +25,7 @@ function cueFromTag(tag) {
   return 'hips';
 }
 
-function Scene({
+function SceneInner({
   drill,
   mode,
   ghostMode,
@@ -38,9 +39,13 @@ function Scene({
   const clock = useRef(0);
   const hudTick = useRef(0);
   const target = useRef(new THREE.Vector3(6.2, 0.12, 0));
+  const sim = useMemo(() => createSimCache(), []);
   const compare = drill === 'comparison';
   const formMode = mode === 'correct' ? 'correct' : 'error';
   const highlight = cueFromTag(activeTag);
+  // Side view is not meaningful for dual-lane comparison; fall back to
+  // quarter explicitly so callers can surface the override in UI.
+  const effectiveCamera = compare && camera === 'side' ? 'quarter' : camera;
 
   const mainProfile = useMemo(
     () => getProfile(drill, compare ? 'correct' : formMode),
@@ -54,7 +59,8 @@ function Scene({
 
   useEffect(() => {
     clock.current = 0;
-  }, [drill, mode]);
+    sim.clear();
+  }, [drill, mode, sim]);
 
   useFrame((_, dt) => {
     const d = Math.min(dt, 0.1);
@@ -65,18 +71,20 @@ function Scene({
     hudTick.current += 1;
     if (hudTick.current % 8 !== 0) return;
     const other = compare
-      ? evaluateDrag(errorProfile, evaluatePose(errorProfile, clock.current, 0.72)).total
+      ? evaluateDrag(errorProfile, sim.getPose(errorProfile, clock.current, 0.72)).total
       : null;
-    onHud?.(evaluateDrag(mainProfile, pose, other), phase, spl);
-  }, [compare, errorProfile, mainProfile, onHud]);
+    const report = evaluateDrag(mainProfile, pose, other);
+    publishHudDrag(report, phase, spl);
+    onHud?.(report, phase, spl);
+  }, [compare, errorProfile, mainProfile, onHud, sim]);
 
   return (
     <>
       <Lights />
       <PoolEnv />
-      <Water />
+      <Water reducedMotion={reducedMotion} playbackSpeed={playbackSpeed} />
       <CameraRig
-        view={compare && camera === 'side' ? 'quarter' : camera}
+        view={effectiveCamera}
         target={target}
       />
 
@@ -89,19 +97,20 @@ function Scene({
             highlight={highlight}
             target={target}
             onHud={publishHud}
+            sim={sim}
           />
-          <Swimmer profile={errorProfile} clock={clock} zLane={0.72} errorTint />
-          <Splash clock={clock} profile={errorProfile} zLane={0.72} />
-          <Splash clock={clock} profile={mainProfile} zLane={-0.72} />
-          <Wake clock={clock} profile={mainProfile} zLane={-0.72} />
-          <Wake clock={clock} profile={errorProfile} zLane={0.72} />
-          <FrontalArea clock={clock} profile={mainProfile} zLane={-0.72} visible={showGuides} />
-          <FrontalArea clock={clock} profile={errorProfile} zLane={0.72} visible={showGuides} />
+          <Swimmer profile={errorProfile} clock={clock} zLane={0.72} errorTint sim={sim} />
+          <Splash clock={clock} profile={errorProfile} zLane={0.72} sim={sim} />
+          <Splash clock={clock} profile={mainProfile} zLane={-0.72} sim={sim} />
+          <Wake clock={clock} profile={mainProfile} zLane={-0.72} sim={sim} />
+          <Wake clock={clock} profile={errorProfile} zLane={0.72} sim={sim} />
+          <FrontalArea clock={clock} profile={mainProfile} zLane={-0.72} visible={showGuides} sim={sim} />
+          <FrontalArea clock={clock} profile={errorProfile} zLane={0.72} visible={showGuides} sim={sim} />
         </>
       ) : (
         <>
           {ghostMode ? (
-            <Swimmer profile={ghostProfile} clock={clock} ghost zLane={-0.62} />
+            <Swimmer profile={ghostProfile} clock={clock} ghost zLane={-0.62} sim={sim} />
           ) : null}
           <Swimmer
             profile={mainProfile}
@@ -110,10 +119,11 @@ function Scene({
             errorTint={formMode === 'error'}
             target={target}
             onHud={publishHud}
+            sim={sim}
           />
-          <Splash clock={clock} profile={mainProfile} />
-          <Wake clock={clock} profile={mainProfile} />
-          <FrontalArea clock={clock} profile={mainProfile} visible={showGuides} />
+          <Splash clock={clock} profile={mainProfile} sim={sim} />
+          <Wake clock={clock} profile={mainProfile} sim={sim} />
+          <FrontalArea clock={clock} profile={mainProfile} visible={showGuides} sim={sim} />
         </>
       )}
 
@@ -122,6 +132,8 @@ function Scene({
     </>
   );
 }
+
+const Scene = memo(SceneInner);
 
 export function PoolCanvas(props) {
   return (

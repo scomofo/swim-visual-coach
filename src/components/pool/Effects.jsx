@@ -3,6 +3,17 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { evaluateDrag } from "../../lib/swim/drag";
 import { evaluatePose } from "../../lib/swim/pose";
+import { pseudoRandom } from "../../lib/swim/simCache";
+
+function getPoseCached(sim, profile, time, zLane) {
+  if (sim) return sim.getPose(profile, time, zLane);
+  return evaluatePose(profile, time, zLane);
+}
+
+function getDragCached(sim, profile, pose, otherTotal = null) {
+  if (sim) return sim.getDrag(profile, pose, otherTotal);
+  return evaluateDrag(profile, pose, otherTotal);
+}
 function Bubbles({
   clock: _clock,
   profile,
@@ -10,6 +21,7 @@ function Bubbles({
 }) {
   const ref = useRef(null);
   const n = 64;
+  const rand = useRef(pseudoRandom(1234));
   const positions = useMemo(() => {
     const a = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
@@ -29,9 +41,10 @@ function Bubbles({
     for (let i = 0; i < n; i++) {
       arr[i * 3 + 1] += d * (0.12 + i % 7 * 0.025) * intensity;
       if (arr[i * 3 + 1] > 0.04) {
-        arr[i * 3] = t.x + (Math.random() - 0.5) * 1.6;
-        arr[i * 3 + 1] = -1.8 - Math.random() * 0.4;
-        arr[i * 3 + 2] = t.z + (Math.random() - 0.5) * 0.7;
+        const r = rand.current;
+        arr[i * 3] = t.x + (r() - 0.5) * 1.6;
+        arr[i * 3 + 1] = -1.8 - r() * 0.4;
+        arr[i * 3 + 2] = t.z + (r() - 0.5) * 0.7;
       }
     }
     points.geometry.attributes.position.needsUpdate = true;
@@ -53,7 +66,8 @@ function Bubbles({
 function Splash({
   clock,
   profile,
-  zLane = 0
+  zLane = 0,
+  sim = null,
 }) {
   const ref = useRef(null);
   const n = 36;
@@ -62,22 +76,24 @@ function Splash({
   const life = useRef(new Float32Array(n));
   const prevRight = useRef(false);
   const prevLeft = useRef(false);
+  const rand = useRef(pseudoRandom(77));
   useFrame((_, dt) => {
     const points = ref.current;
     if (!points) return;
-    const pose = evaluatePose(profile, clock.current, zLane);
+    const pose = getPoseCached(sim, profile, clock.current, zLane);
     const d = Math.min(dt, 0.1);
     const arr = points.geometry.attributes.position.array;
     const vel = velocities.current;
     const burst = (x, z) => {
+      const r = rand.current;
       for (let i = 0; i < n; i++) {
         if (life.current[i] > 0.05) continue;
         arr[i * 3] = x;
         arr[i * 3 + 1] = 0.02;
-        arr[i * 3 + 2] = z + (Math.random() - 0.5) * 0.08;
-        vel[i * 3] = (Math.random() - 0.3) * 0.6;
-        vel[i * 3 + 1] = 0.4 + Math.random() * 0.7;
-        vel[i * 3 + 2] = (Math.random() - 0.5) * 0.4;
+        arr[i * 3 + 2] = z + (r() - 0.5) * 0.08;
+        vel[i * 3] = (r() - 0.3) * 0.6;
+        vel[i * 3 + 1] = 0.4 + r() * 0.7;
+        vel[i * 3 + 2] = (r() - 0.5) * 0.4;
         life.current[i] = 1;
       }
     };
@@ -118,7 +134,8 @@ function Splash({
 function Wake({
   clock,
   profile,
-  zLane = 0
+  zLane = 0,
+  sim = null,
 }) {
   const ref = useRef(null);
   const mat = useRef(null);
@@ -134,11 +151,12 @@ function Wake({
   }, []);
   const life = useRef(new Float32Array(n));
   const spawn = useRef(0);
+  const rand = useRef(pseudoRandom(999));
   useFrame((_, dt) => {
     const points = ref.current;
     if (!points) return;
-    const pose = evaluatePose(profile, clock.current, zLane);
-    const drag = evaluateDrag(profile, pose);
+    const pose = getPoseCached(sim, profile, clock.current, zLane);
+    const drag = getDragCached(sim, profile, pose);
     const d = Math.min(dt, 0.1);
     const arr = points.geometry.attributes.position.array;
     const spread = 0.08 + drag.area * 0.55 + drag.wave * 0.35;
@@ -154,9 +172,9 @@ function Wake({
           slot = i;
         }
       }
-      const side = (Math.random() - 0.5) * spread;
-      arr[slot * 3] = pose.x - 0.35 - Math.random() * 0.2;
-      arr[slot * 3 + 1] = pose.y - 0.08 - drag.form * 0.18 + Math.random() * 0.06;
+      const side = (rand.current() - 0.5) * spread;
+      arr[slot * 3] = pose.x - 0.35 - rand.current() * 0.2;
+      arr[slot * 3 + 1] = pose.y - 0.08 - drag.form * 0.18 + rand.current() * 0.06;
       arr[slot * 3 + 2] = pose.z + side;
       life.current[slot] = 1;
     }
@@ -166,9 +184,11 @@ function Wake({
         arr[i * 3 + 1] = -8;
         continue;
       }
+      const r1 = rand.current();
+      const r2 = rand.current();
       arr[i * 3] -= drift * d;
-      arr[i * 3 + 1] += (Math.random() - 0.5) * drag.wave * 0.08;
-      arr[i * 3 + 2] += (Math.random() - 0.5) * drag.form * 0.05;
+      arr[i * 3 + 1] += (r1 - 0.5) * drag.wave * 0.08;
+      arr[i * 3 + 2] += (r2 - 0.5) * drag.form * 0.05;
       life.current[i] -= d * (0.35 + (1 - drag.total) * 0.45);
     }
     points.geometry.attributes.position.needsUpdate = true;
@@ -197,7 +217,8 @@ function FrontalArea({
   clock,
   profile,
   zLane = 0,
-  visible
+  visible,
+  sim = null,
 }) {
   const plate = useRef(null);
   const mat = useRef(null);
@@ -206,8 +227,8 @@ function FrontalArea({
     if (!mesh) return;
     mesh.visible = visible;
     if (!visible) return;
-    const pose = evaluatePose(profile, clock.current, zLane);
-    const drag = evaluateDrag(profile, pose);
+    const pose = getPoseCached(sim, profile, clock.current, zLane);
+    const drag = getDragCached(sim, profile, pose);
     mesh.position.set(pose.x + 1.05, pose.y + 0.02, pose.z);
     const h = 0.2 + drag.area * 0.55;
     const w = 0.16 + drag.area * 0.5;

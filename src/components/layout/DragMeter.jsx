@@ -1,4 +1,5 @@
 import { IDLE_DRAG } from '../../lib/swim/drag';
+import { useHudDrag } from '../../state/hudStore';
 
 function Bar({ label, value, hint }) {
   const hot = value > 0.55;
@@ -21,7 +22,8 @@ function Bar({ label, value, hint }) {
 }
 
 export default function DragMeter({ drag, compare = false }) {
-  const report = drag ?? IDLE_DRAG;
+  const storeDrag = useHudDrag();
+  const report = drag ?? storeDrag ?? IDLE_DRAG;
   const pct = Math.round((report.total ?? 0) * 100);
   return (
     <aside

@@ -4,6 +4,8 @@ export default function usePerformanceMode() {
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     const update = () => {
@@ -12,10 +14,16 @@ export default function usePerformanceMode() {
 
     update();
 
-    media.addEventListener('change', update);
-
+    if (media.addEventListener) {
+      media.addEventListener('change', update);
+      return () => {
+        media.removeEventListener('change', update);
+      };
+    }
+    // Safari < 14 fallback
+    media.addListener(update);
     return () => {
-      media.removeEventListener('change', update);
+      media.removeListener(update);
     };
   }, []);
 

@@ -19,10 +19,11 @@ export default function useGuidedPractice({
   markComplete,
 }) {
   const currentIndex = GUIDED_SEQUENCE.indexOf(drill);
-  const isLastStep = currentIndex === GUIDED_SEQUENCE.length - 1;
+  const isKnown = currentIndex >= 0;
+  const isLastStep = isKnown && currentIndex === GUIDED_SEQUENCE.length - 1;
 
   const advance = () => {
-    if (currentIndex < 0 || isLastStep) return;
+    if (!isKnown || isLastStep) return;
 
     const nextDrill = GUIDED_SEQUENCE[currentIndex + 1];
 
@@ -30,14 +31,16 @@ export default function useGuidedPractice({
   };
 
   const complete = () => {
+    if (!isKnown) return;
     markComplete(drill);
   };
 
   return {
-    sessionStep: currentIndex + 1,
+    sessionStep: isKnown ? currentIndex + 1 : 0,
     totalSteps: GUIDED_SEQUENCE.length,
     advance,
     complete,
     isLastStep,
+    isKnown,
   };
 }

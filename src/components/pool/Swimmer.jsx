@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { evaluatePose } from "../../lib/swim/pose";
@@ -70,7 +70,8 @@ function Swimmer({
   errorTint = false,
   zLane = 0,
   onHud,
-  target
+  target,
+  sim = null,
 }) {
   const joints = useRef({});
   const skin = useMemo(
@@ -104,14 +105,25 @@ function Swimmer({
     }),
     [ghost]
   );
-  const bind = (name) => (node) => {
-    if (node) joints.current[name] = node;
-  };
-  const lastCue = useRef(Symbol("init"));
+  useEffect(() => () => {
+    for (const m of [skin, cap, suit, headMat, chestMat, hipMat, armMat, kickMat, goggleMat]) {
+      try { m?.dispose?.(); } catch { /* ignore dispose errors */ }
+    }
+  }, [skin, cap, suit, headMat, chestMat, hipMat, armMat, kickMat, goggleMat]);
+  const binderCache = useRef({});
+  const bind = useCallback((name) => {
+    if (!binderCache.current[name]) {
+      binderCache.current[name] = (node) => {
+        if (node) joints.current[name] = node;
+      };
+    }
+    return binderCache.current[name];
+  }, []);
+  const lastCue = useRef(null);
   useFrame(() => {
     const j = joints.current;
     if (!j.root || !j.hips) return;
-    const pose = evaluatePose(profile, clock.current, zLane);
+    const pose = sim ? sim.getPose(profile, clock.current, zLane) : evaluatePose(profile, clock.current, zLane);
     applyPose(j, pose);
     if (target && !ghost) {
       target.current.set(pose.x + 0.4, pose.y + 0.04, pose.z);

@@ -20,7 +20,8 @@ npm test
 npm run build
 ```
 
-Pull requests run the full check suite on Node.js 20 and 22.
+Pull requests and pushes to `main` run lint + tests + build on Node.js 20 and 22 (`.github/workflows/ci.yml`).
+Deploys to GitHub Pages run from `main` on Node.js 20 (`.github/workflows/github-pages.yml`).
 
 ## Features
 

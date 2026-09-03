@@ -28,6 +28,12 @@ export default [
     },
   },
   {
+    files: ['*.config.js'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
+    },
+  },
+  {
     files: ['src/components/pool/**/*.{js,jsx}'],
     rules: {
       'react-hooks/purity': 'off',

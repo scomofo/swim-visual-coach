@@ -308,7 +308,11 @@ const PROFILES = {
   }
 };
 function getProfile(drill, mode) {
-  return PROFILES[drill][mode];
+  const entry = PROFILES[drill];
+  if (!entry) throw new Error(`Unknown drill: ${drill}`);
+  const profile = entry[mode];
+  if (!profile) throw new Error(`Unknown mode "${mode}" for drill "${drill}"`);
+  return profile;
 }
 export {
   PROFILES,

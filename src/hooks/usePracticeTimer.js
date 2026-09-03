@@ -4,12 +4,12 @@ export default function usePracticeTimer(active) {
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(active);
 
-  // Sync running state with active prop
-  const [prevActive, setPrevActive] = useState(active);
-  if (active !== prevActive) {
-    setPrevActive(active);
+  // Sync running state with active prop. Intentional prop-sync effect:
+  // user can still pause/resume via setRunning between prop changes.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRunning(active);
-  }
+  }, [active]);
 
   useEffect(() => {
     if (!running) return;

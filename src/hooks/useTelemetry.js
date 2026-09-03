@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function useTelemetry(drill) {
   const [sessionStart] = useState(() => Date.now());
@@ -24,15 +24,17 @@ export default function useTelemetry(drill) {
     return () => clearInterval(interval);
   }, [sessionStart]);
 
-  // Track drill changes
-  const [prevDrillId, setPrevDrillId] = useState(drill);
-  if (drill !== prevDrillId) {
-    setPrevDrillId(drill);
-    setMetrics((prev) => ({
-      ...prev,
-      drillChanges: prev.drillChanges + 1,
-    }));
-  }
+  // Track drill changes without setting state during render
+  const prevDrillRef = useRef(drill);
+  useEffect(() => {
+    if (drill !== prevDrillRef.current) {
+      prevDrillRef.current = drill;
+      setMetrics((prev) => ({
+        ...prev,
+        drillChanges: prev.drillChanges + 1,
+      }));
+    }
+  }, [drill]);
 
   return metrics;
 }

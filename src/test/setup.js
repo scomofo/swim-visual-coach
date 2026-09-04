@@ -1,6 +1,8 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
+import { IDLE_DRAG } from '../lib/swim/drag';
+import { useCoach } from '../store/coach';
 
 vi.mock('../components/pool/PoolCanvas', () => ({
   PoolCanvas: () => null,
@@ -33,4 +35,23 @@ afterEach(() => {
   cleanup();
   localStorage.clear();
   window.matchMedia = createMatchMedia(false);
+  useCoach.setState({
+    drill: 'superman',
+    mode: 'correct',
+    playing: true,
+    speed: 1,
+    camera: 'quarter',
+    ghost: false,
+    guides: true,
+    audio: false,
+    focus: false,
+    highlight: null,
+    completed: {},
+    showOnboarding: false,
+    celebration: false,
+    hudPhase: 'Streamline',
+    hudSpl: 0,
+    hudDrag: IDLE_DRAG,
+    hydrated: false,
+  });
 });

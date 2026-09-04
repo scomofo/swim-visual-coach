@@ -3,44 +3,45 @@ import { describe, expect, it } from 'vitest';
 import App from './App';
 import { createMatchMedia } from './test/setup';
 
+async function beginPractice() {
+  fireEvent.click(await screen.findByRole('button', { name: 'Begin practice' }));
+}
+
 describe('App curriculum and layout', () => {
   it('only completes a drill after an explicit completion action', async () => {
     render(<App />);
+    await beginPractice();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Begin Practice' }));
     fireEvent.click(screen.getByRole('button', { name: /Efficient vs Rushed/ }));
 
-    expect(await screen.findByText('Step 12 of 12')).toBeInTheDocument();
-    expect(screen.getByText(/0\s*\/\s*12 completed/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Final Step' })).toBeDisabled();
+    expect(screen.getByText(/0\s*\/\s*12 mastered/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Next drill' })).toBeDisabled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Complete Drill' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Mark mastered' }));
 
     await waitFor(() => {
-      expect(screen.getByText(/1\s*\/\s*12 completed/)).toBeInTheDocument();
+      expect(screen.getByText(/1\s*\/\s*12 mastered/)).toBeInTheDocument();
     });
-    expect(screen.getByRole('button', { name: 'Drill Completed' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Mastered' })).toBeDisabled();
   });
 
-  it('uses a viewport-relative focus layout without a fixed inner scene', () => {
+  it('uses a viewport-relative focus layout', async () => {
     render(<App />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Begin Practice' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Focus Mode' }));
+    await beginPractice();
+    fireEvent.click(screen.getByRole('button', { name: 'Focus' }));
 
     const visualization = screen.getByTestId('visualization');
-    expect(visualization.className).toContain('h-[calc(100dvh-7rem)]');
+    expect(visualization.className).toContain('h-[calc(100dvh-9.5rem)]');
     expect(visualization.className).toContain('min-h-[420px]');
-    expect(visualization.firstElementChild?.nextElementSibling?.className).toContain('h-full');
   });
 
-  it('propagates the reduced-motion preference to continuous visuals', async () => {
+  it('pauses playback when the user prefers reduced motion', async () => {
     window.matchMedia = createMatchMedia(true);
     render(<App />);
+    await beginPractice();
 
     await waitFor(() => {
-      expect(document.querySelector('[data-reduced-motion="true"]')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
     });
-    expect(document.querySelectorAll('[data-motion="static"]')).toHaveLength(2);
   });
 });

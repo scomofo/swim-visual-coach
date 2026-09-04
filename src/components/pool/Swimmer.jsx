@@ -136,25 +136,36 @@ function Swimmer({
   return <group ref={bind("root")} position={[6.2, 0.12, 0]} scale={1.14} renderOrder={2}>
       <group ref={bind("hips")}>
         <mesh
-    position={[0.05, 0, 0]}
-    rotation={[0, 0, -Math.PI / 2]}
-    scale={[0.82, 1, 1.22]}
-    material={hipMat}
-    renderOrder={2}
-  >
-          <capsuleGeometry args={[0.13, 0.18, 6, 14]} />
+          position={[0.04, 0, 0]}
+          rotation={[0, 0, -Math.PI / 2]}
+          scale={[0.92, 1, 1.32]}
+          material={hipMat}
+          renderOrder={2}
+        >
+          <capsuleGeometry args={[0.14, 0.22, 6, 14]} />
+        </mesh>
+        <mesh
+          position={[0.05, -0.02, 0]}
+          rotation={[Math.PI / 2, 0, 0]}
+          material={hipMat}
+          renderOrder={2}
+        >
+          <capsuleGeometry args={[0.075, 0.14, 6, 12]} />
         </mesh>
 
-        <group ref={bind("lHip")} position={[0.02, -0.015, -0.13]}>
-          <mesh
-    rotation={[0, 0, -Math.PI / 2]}
-    position={[0.12, 0, 0]}
-    material={hipMat}
-    renderOrder={2}
-  >
-            <capsuleGeometry args={[0.056, 0.2, 6, 12]} />
+        <group ref={bind("lHip")} position={[0.03, -0.012, -0.11]}>
+          <mesh material={hipMat} renderOrder={2}>
+            <sphereGeometry args={[0.074, 12, 10]} />
           </mesh>
-          <Bone radius={0.05} length={0.38} material={kickMat} joint={0.056} />
+          <mesh
+            rotation={[0, 0, -Math.PI / 2]}
+            position={[0.1, 0, 0]}
+            material={hipMat}
+            renderOrder={2}
+          >
+            <capsuleGeometry args={[0.064, 0.24, 6, 12]} />
+          </mesh>
+          <Bone radius={0.05} length={0.38} material={kickMat} />
           <group ref={bind("lKnee")} position={[0.38, 0, 0]}>
             <Bone radius={0.038} length={0.36} material={kickMat} joint={0.044} />
             <mesh
@@ -168,16 +179,19 @@ function Swimmer({
           </group>
         </group>
 
-        <group ref={bind("rHip")} position={[0.02, -0.015, 0.13]}>
-          <mesh
-    rotation={[0, 0, -Math.PI / 2]}
-    position={[0.12, 0, 0]}
-    material={hipMat}
-    renderOrder={2}
-  >
-            <capsuleGeometry args={[0.056, 0.2, 6, 12]} />
+        <group ref={bind("rHip")} position={[0.03, -0.012, 0.11]}>
+          <mesh material={hipMat} renderOrder={2}>
+            <sphereGeometry args={[0.074, 12, 10]} />
           </mesh>
-          <Bone radius={0.05} length={0.38} material={kickMat} joint={0.056} />
+          <mesh
+            rotation={[0, 0, -Math.PI / 2]}
+            position={[0.1, 0, 0]}
+            material={hipMat}
+            renderOrder={2}
+          >
+            <capsuleGeometry args={[0.064, 0.24, 6, 12]} />
+          </mesh>
+          <Bone radius={0.05} length={0.38} material={kickMat} />
           <group ref={bind("rKnee")} position={[0.38, 0, 0]}>
             <Bone radius={0.038} length={0.36} material={kickMat} joint={0.044} />
             <mesh

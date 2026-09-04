@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Waves } from 'lucide-react';
 import { DRILLS, DRILL_ORDER } from '../../data/drills';
+import { cancelSpeech, speak } from '../../lib/narration';
 import { cn } from '../../lib/utils';
 import { useCoach } from '../../store/coach';
 import { LaneView } from './LaneView';
@@ -11,18 +12,14 @@ import { DragMeter } from './DragMeter';
 
 function useNarration() {
   const audio = useCoach((s) => s.audio);
+  const voice = useCoach((s) => s.voice);
   const drill = useCoach((s) => s.drill);
 
   useEffect(() => {
-    if (!audio || typeof window === 'undefined' || !window.speechSynthesis) return;
-    const text = DRILLS[drill].narration;
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.88;
-    utter.pitch = 0.92;
-    window.speechSynthesis.speak(utter);
-    return () => window.speechSynthesis.cancel();
-  }, [audio, drill]);
+    if (!audio) return;
+    speak(DRILLS[drill].narration, { voiceURI: voice });
+    return () => cancelSpeech();
+  }, [audio, voice, drill]);
 }
 
 function useHotkeys() {

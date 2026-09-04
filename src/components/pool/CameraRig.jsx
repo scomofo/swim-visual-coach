@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { LANE_LENGTH } from "../../lib/swim/pose";
+import { useCoach } from "../../store/coach";
 function writeViewOffset(view, t, desired, look) {
   switch (view) {
     case "quarter":
@@ -28,11 +30,16 @@ function writeViewOffset(view, t, desired, look) {
 }
 function CameraRig({
   view,
-  target
+  target,
+  paired = false,
+  laneCenter = 0
 }) {
   const { camera } = useThree();
+  const reducedMotion = useCoach((s) => s.reducedMotion);
   const inited = useRef(false);
   const lastView = useRef(view);
+  const lastPaired = useRef(paired);
+  const lastX = useRef(null);
   const desired = useRef(new THREE.Vector3());
   const look = useRef(new THREE.Vector3());
   const currentLook = useRef(new THREE.Vector3());
@@ -40,7 +47,21 @@ function CameraRig({
     const d = Math.min(dt, 0.1);
     const t = target.current;
     writeViewOffset(view, t, desired.current, look.current);
-    if (!inited.current) {
+    if (paired) {
+      // Fit both complete bodies, including on narrow screens, while keeping
+      // the chosen view direction. A common travel speed prevents separation.
+      const halfFov = Math.atan(
+        Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * Math.min(1, camera.aspect),
+      );
+      desired.current.sub(look.current).normalize();
+      look.current.set(t.x - 0.25, 0, laneCenter);
+      desired.current.multiplyScalar(1.9 / Math.sin(halfFov)).add(look.current);
+    }
+    const wrapped = lastX.current !== null && Math.abs(t.x - lastX.current) > LANE_LENGTH / 2;
+    lastX.current = t.x;
+    const pairingChanged = lastPaired.current !== paired;
+    lastPaired.current = paired;
+    if (!inited.current || reducedMotion || wrapped || pairingChanged) {
       camera.position.copy(desired.current);
       currentLook.current.copy(look.current);
       camera.lookAt(currentLook.current);

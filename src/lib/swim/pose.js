@@ -141,6 +141,7 @@ function phaseName(profile, armPhase, u) {
     return profile.style === "kickGlide" ? "Flutter glide" : "Streamline";
   }
   if (profile.style === "skate" && (u < 0.7 || u > 0.9)) return "Skate";
+  if (profile.style === "breatheSkate" && (u < 0.58 || u > 0.76)) return "Skate";
   if (profile.style === "single" && u < 0.55) return "Patient skate";
   if (profile.style === "triple" && u > 0.55) return "Glide";
   if (profile.style === "longGlide" && u > 0.4) return "Long glide";
@@ -151,19 +152,23 @@ function phaseName(profile, armPhase, u) {
   if (p < 0.88) return "Recovery";
   return "Entry";
 }
-function breathEnvelope(armPhase, every, time, cycle) {
+function breathEnvelope(phase, every, cycleIndex, start = 0.58, end = 0.82) {
   if (every <= 0) return 0;
-  const strokeIndex = Math.floor(time / cycle);
-  if (strokeIndex % every !== 0) return 0;
-  const p = wrap01(armPhase);
-  if (p > 0.58 && p < 0.82) {
-    return Math.sin((p - 0.58) / 0.24 * Math.PI);
+  if (cycleIndex % every !== 0) return 0;
+  const p = wrap01(phase);
+  if (p > start && p < end) {
+    return Math.sin((p - start) / (end - start) * Math.PI) ** 2;
   }
   return 0;
 }
 function evaluatePose(profile, time, zLane = 0) {
-  const u = wrap01(time / Math.max(profile.cycle, 1e-3));
-  const rawPhase = strokePhase(u, profile);
+  const cycleTime = time / Math.max(profile.cycle, 1e-3);
+  const cycleIndex = Math.floor(cycleTime);
+  const u = wrap01(cycleTime);
+  // An odd number of switches finishes on the opposite side. Start the next
+  // repetition there instead of teleporting the arms and torso back to zero.
+  const phaseAdvance = strokePhase(1, profile);
+  const rawPhase = cycleIndex * phaseAdvance + strokePhase(u, profile);
   const armPhase = wrap01(rawPhase);
   const frames = profile.armSet === "ti" ? TI_RIGHT : WINDMILL_RIGHT;
   let rightArm;
@@ -177,16 +182,24 @@ function evaluatePose(profile, time, zLane = 0) {
   }
   const rollPhase = profile.bothForward ? 0 : Math.cos(armPhase * Math.PI * 2);
   const bodyRoll = rollPhase * profile.roll;
-  const breath = breathEnvelope(armPhase, profile.breathEvery, time, profile.cycle);
-  const headRoll = breath * profile.breathAmount * (rollPhase >= 0 ? 1 : -1);
-  const headYaw = breath * 0.18 * (rollPhase >= 0 ? 1 : -1);
+  const skateBreath = profile.style === "breatheSkate";
+  // Breathe during the held skate, before the switch. This drill never reaches
+  // the full-stroke recovery window used by the other breathing profiles.
+  const breath = skateBreath
+    ? breathEnvelope(u, profile.breathEvery, cycleIndex, 0.12, 0.48)
+    : breathEnvelope(armPhase, profile.breathEvery, cycleIndex);
+  const breathSide = skateBreath ? (cycleIndex % 2 === 0 ? 1 : -1) : -1;
+  const headRoll = breath * profile.breathAmount * breathSide;
+  const headYaw = breath * 0.18 * breathSide;
   const errorLift = profile.headPitch > 0 ? breath * 0.15 : 0;
   const kickWave = Math.sin(time * profile.kickHz * Math.PI * 2);
   const kickL = kickWave * profile.kickAmp;
   const kickR = -kickWave * profile.kickAmp;
   const downL = Math.max(0, -kickWave);
   const downR = Math.max(0, kickWave);
-  const dist = time * profile.speed;
+  // Paired demonstrations share travel, while retaining their own stroke and
+  // kick timing and drag profiles so neither swimmer leaves the comparison.
+  const dist = time * (profile.travelSpeed ?? profile.speed);
   const x = LANE_START + (dist % LANE_LENGTH + LANE_LENGTH) % LANE_LENGTH;
   const bob = Math.sin(time * profile.kickHz * Math.PI * 2) * profile.kickAmp * 0.12 + Math.sin(armPhase * Math.PI * 2) * (profile.bothForward ? 8e-3 : 0.02);
   const yawWobble = Math.sin(time * 6.2) * profile.wobble;
@@ -221,7 +234,7 @@ function evaluatePose(profile, time, zLane = 0) {
       splay: -profile.kickSplay
     },
     armPhase,
-    phaseName: phaseName(profile, armPhase, u),
+    phaseName: breath > 0.35 ? "Breath" : phaseName(profile, armPhase, u),
     rightEntry,
     leftEntry,
     breathing: breath > 0.35

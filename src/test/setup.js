@@ -39,6 +39,7 @@ afterEach(() => {
     drill: 'superman',
     mode: 'correct',
     playing: true,
+    reducedMotion: false,
     speed: 1,
     camera: 'quarter',
     ghost: false,

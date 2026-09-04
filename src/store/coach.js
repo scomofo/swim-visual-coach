@@ -1,14 +1,28 @@
 import { create } from 'zustand';
-import { DRILLS } from '../data/drills';
+import { DRILLS, DRILL_ORDER } from '../data/drills';
 import { IDLE_DRAG } from '../lib/swim/drag';
 
 export const PROGRESS_KEY = 'swim-visual-coach-progress-v3';
+export const LEGACY_PROGRESS_KEY = 'swim-visual-coach-progress-v2';
 export const ONBOARD_KEY = 'swim-visual-coach-onboard-v1';
+
+function readProgress(key) {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(key));
+    if (!stored || typeof stored !== 'object' || Array.isArray(stored)) return {};
+    return Object.fromEntries(
+      DRILL_ORDER.filter((id) => stored[id] === true).map((id) => [id, true]),
+    );
+  } catch {
+    return {};
+  }
+}
 
 export const useCoach = create((set, get) => ({
   drill: 'superman',
   mode: 'correct',
   playing: true,
+  reducedMotion: false,
   speed: 1,
   camera: 'quarter',
   ghost: false,
@@ -25,18 +39,23 @@ export const useCoach = create((set, get) => ({
   hydrated: false,
   hydrate: () => {
     if (get().hydrated || typeof window === 'undefined') return;
-    let completed = {};
+    // Keep v2 as a recovery copy, and merge it with mastery earned since the
+    // redesign. The old v1 records included drills that were merely opened.
+    const completed = { ...readProgress(LEGACY_PROGRESS_KEY), ...readProgress(PROGRESS_KEY) };
+    let showOnboarding = true;
     try {
-      const raw = localStorage.getItem(PROGRESS_KEY);
-      if (raw) completed = JSON.parse(raw);
+      showOnboarding = window.localStorage.getItem(ONBOARD_KEY) !== '1';
     } catch {
-      completed = {};
+      // Storage restrictions must not prevent practice in memory.
     }
-    set({
-      hydrated: true,
-      completed,
-      showOnboarding: localStorage.getItem(ONBOARD_KEY) !== '1',
-    });
+    try {
+      if (Object.keys(completed).length > 0) {
+        window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(completed));
+      }
+    } catch {
+      // Recovered progress is still usable when storage is read-only or full.
+    }
+    set({ hydrated: true, completed, showOnboarding });
   },
   setDrill: (id) =>
     set({
@@ -46,6 +65,8 @@ export const useCoach = create((set, get) => ({
     }),
   setMode: (mode) => set({ mode }),
   setPlaying: (playing) => set({ playing }),
+  setReducedMotion: (reducedMotion) =>
+    set({ reducedMotion, ...(reducedMotion ? { playing: false } : {}) }),
   togglePlaying: () => set({ playing: !get().playing }),
   setSpeed: (speed) => set({ speed }),
   setCamera: (camera) => set({ camera }),

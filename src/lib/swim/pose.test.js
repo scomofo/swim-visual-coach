@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { evaluateDrag } from './drag';
 import { LANE_LENGTH, LANE_START, evaluatePose, wrapLaneX } from './pose';
-import { getProfile } from './profiles';
+import { getProfile, PROFILES } from './profiles';
 
 describe('pose', () => {
   it('wraps lane positions including negative inputs', () => {
@@ -11,13 +11,39 @@ describe('pose', () => {
     expect(wrapLaneX(LANE_START - 1)).toBeLessThan(LANE_START + LANE_LENGTH);
   });
 
-  it('is seamless across the stroke cycle boundary', () => {
-    const profile = getProfile('rhythm', 'correct');
-    const a = evaluatePose(profile, 0.001);
-    const b = evaluatePose(profile, profile.cycle - 0.001);
-    // Positions advance along the lane, but body articulation should be close
-    expect(Math.abs(a.bodyRoll - b.bodyRoll)).toBeLessThan(0.15);
-    expect(a.phaseName).toBeDefined();
+  it.each(Object.keys(PROFILES))('keeps %s articulation continuous across consecutive loops', (drill) => {
+    for (const mode of ['correct', 'error']) {
+      const profile = getProfile(drill, mode);
+      for (const cycle of [1, 2]) {
+        const before = evaluatePose(profile, profile.cycle * cycle - 0.000001);
+        const after = evaluatePose(profile, profile.cycle * cycle + 0.000001);
+        for (const joint of ['bodyRoll', 'headRoll', 'headYaw']) {
+          expect(Math.abs(after[joint] - before[joint]), `${mode}/${cycle}/${joint}`).toBeLessThan(0.01);
+        }
+        for (const side of ['leftArm', 'rightArm']) {
+          for (const joint of ['rx', 'ry', 'rz', 'elbow', 'wrist']) {
+            expect(Math.abs(after[side][joint] - before[side][joint]), `${mode}/${cycle}/${side}/${joint}`).toBeLessThan(0.01);
+          }
+        }
+      }
+    }
+  });
+
+  it.each(['correct', 'error'])('shows a complete head turn on both skates in the breathing drill (%s)', (mode) => {
+    const profile = getProfile('breathing', mode);
+    for (const cycle of [0, 1]) {
+      const before = evaluatePose(profile, profile.cycle * (cycle + 0.05));
+      const breath = evaluatePose(profile, profile.cycle * (cycle + 0.3));
+      const after = evaluatePose(profile, profile.cycle * (cycle + 0.5));
+      expect(before.breathing).toBe(false);
+      expect(breath.breathing).toBe(true);
+      expect(breath.phaseName).toBe('Breath');
+      expect(Math.abs(breath.headRoll)).toBeGreaterThan(0.4);
+      expect(breath.headRoll * breath.bodyRoll).toBeGreaterThan(0);
+      expect(breath.rightArm).toEqual(before.rightArm);
+      expect(after.headRoll).toBeCloseTo(0);
+      expect(after.breathing).toBe(false);
+    }
   });
 
   it('always returns finite drag numbers in range', () => {

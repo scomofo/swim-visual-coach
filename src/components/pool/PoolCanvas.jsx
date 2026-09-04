@@ -1,21 +1,20 @@
 import { Suspense, useEffect, useMemo, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useCoach } from '../../store/coach';
 import { evaluateDrag } from '../../lib/swim/drag';
 import { evaluatePose } from '../../lib/swim/pose';
 import { getProfile } from '../../lib/swim/profiles';
+import { usePlaybackFrame } from '../../hooks/usePlaybackFrame';
 import { Swimmer } from './Swimmer';
 import { Water } from './Water';
 import { Lights, PoolEnv } from './PoolEnv';
 import { CameraRig } from './CameraRig';
 import { Bubbles, FrontalArea, GuideLine, Splash, Wake } from './Effects';
 
-function Scene() {
+export function PoolScene() {
   const drill = useCoach((s) => s.drill);
   const mode = useCoach((s) => s.mode);
-  const playing = useCoach((s) => s.playing);
-  const speed = useCoach((s) => s.speed);
   const camera = useCoach((s) => s.camera);
   const ghost = useCoach((s) => s.ghost);
   const guides = useCoach((s) => s.guides);
@@ -32,19 +31,24 @@ function Scene() {
     [drill, mode, compare],
   );
   const ghostProfile = useMemo(
-    () => getProfile(drill, mode === 'correct' ? 'error' : 'correct'),
-    [drill, mode],
+    () => ({
+      ...getProfile(drill, mode === 'correct' ? 'error' : 'correct'),
+      travelSpeed: mainProfile.speed,
+    }),
+    [drill, mode, mainProfile],
   );
-  const errorProfile = useMemo(() => getProfile(drill, 'error'), [drill]);
+  const errorProfile = useMemo(
+    () => ({ ...getProfile(drill, 'error'), travelSpeed: mainProfile.speed }),
+    [drill, mainProfile],
+  );
 
   useEffect(() => {
     clock.current = 0;
   }, [drill, mode]);
 
-  useFrame((_, dt) => {
-    const d = Math.min(dt, 0.1);
-    if (playing) clock.current += d * speed;
-  }, -1);
+  usePlaybackFrame((_, dt) => {
+    clock.current += dt;
+  }, { priority: -2 });
 
   const publishHud = (phase, spl, pose) => {
     hudTick.current += 1;
@@ -62,8 +66,10 @@ function Scene() {
       <PoolEnv />
       <Water />
       <CameraRig
-        view={compare && camera === 'side' ? 'quarter' : camera}
+        view={camera}
         target={target}
+        paired={compare || ghost}
+        laneCenter={compare ? 0 : -0.31}
       />
 
       {compare ? (
@@ -128,7 +134,7 @@ export function PoolCanvas() {
       }}
     >
       <Suspense fallback={null}>
-        <Scene />
+        <PoolScene />
       </Suspense>
     </Canvas>
   );

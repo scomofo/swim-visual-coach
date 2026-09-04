@@ -1,6 +1,7 @@
-import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useCoach } from '../../store/coach';
 import { evaluateDrag } from '../../lib/swim/drag';
 import { evaluatePose } from '../../lib/swim/pose';
 import { getProfile } from '../../lib/swim/profiles';
@@ -10,45 +11,29 @@ import { Lights, PoolEnv } from './PoolEnv';
 import { CameraRig } from './CameraRig';
 import { Bubbles, FrontalArea, GuideLine, Splash, Wake } from './Effects';
 
-function cueFromTag(tag) {
-  if (!tag) return null;
-  const t = tag.toLowerCase();
-  if (t.includes('head') || t.includes('eyes') || t.includes('goggle') || t.includes('breath')) {
-    return 'head';
-  }
-  if (t.includes('chest') || t.includes('press')) return 'chest';
-  if (t.includes('kick') || t.includes('splash') || t.includes('leg')) return 'kick';
-  if (t.includes('arm') || t.includes('mail') || t.includes('switch') || t.includes('vessel')) {
-    return 'arm';
-  }
-  return 'hips';
-}
+function Scene() {
+  const drill = useCoach((s) => s.drill);
+  const mode = useCoach((s) => s.mode);
+  const playing = useCoach((s) => s.playing);
+  const speed = useCoach((s) => s.speed);
+  const camera = useCoach((s) => s.camera);
+  const ghost = useCoach((s) => s.ghost);
+  const guides = useCoach((s) => s.guides);
+  const highlight = useCoach((s) => s.highlight);
+  const setHud = useCoach((s) => s.setHud);
 
-function Scene({
-  drill,
-  mode,
-  ghostMode,
-  showGuides,
-  playbackSpeed,
-  camera,
-  activeTag,
-  reducedMotion,
-  onHud,
-}) {
   const clock = useRef(0);
   const hudTick = useRef(0);
   const target = useRef(new THREE.Vector3(6.2, 0.12, 0));
   const compare = drill === 'comparison';
-  const formMode = mode === 'correct' ? 'correct' : 'error';
-  const highlight = cueFromTag(activeTag);
 
   const mainProfile = useMemo(
-    () => getProfile(drill, compare ? 'correct' : formMode),
-    [drill, formMode, compare],
+    () => getProfile(drill, compare ? 'correct' : mode),
+    [drill, mode, compare],
   );
   const ghostProfile = useMemo(
-    () => getProfile(drill, formMode === 'correct' ? 'error' : 'correct'),
-    [drill, formMode],
+    () => getProfile(drill, mode === 'correct' ? 'error' : 'correct'),
+    [drill, mode],
   );
   const errorProfile = useMemo(() => getProfile(drill, 'error'), [drill]);
 
@@ -58,17 +43,18 @@ function Scene({
 
   useFrame((_, dt) => {
     const d = Math.min(dt, 0.1);
-    if (!reducedMotion) clock.current += d * playbackSpeed;
+    if (playing) clock.current += d * speed;
   }, -1);
 
-  const publishHud = useCallback((phase, spl, pose) => {
+  const publishHud = (phase, spl, pose) => {
     hudTick.current += 1;
     if (hudTick.current % 8 !== 0) return;
     const other = compare
       ? evaluateDrag(errorProfile, evaluatePose(errorProfile, clock.current, 0.72)).total
       : null;
-    onHud?.(evaluateDrag(mainProfile, pose, other), phase, spl);
-  }, [compare, errorProfile, mainProfile, onHud]);
+    const drag = evaluateDrag(mainProfile, pose, other);
+    setHud(phase, spl, drag);
+  };
 
   return (
     <>
@@ -95,35 +81,35 @@ function Scene({
           <Splash clock={clock} profile={mainProfile} zLane={-0.72} />
           <Wake clock={clock} profile={mainProfile} zLane={-0.72} />
           <Wake clock={clock} profile={errorProfile} zLane={0.72} />
-          <FrontalArea clock={clock} profile={mainProfile} zLane={-0.72} visible={showGuides} />
-          <FrontalArea clock={clock} profile={errorProfile} zLane={0.72} visible={showGuides} />
+          <FrontalArea clock={clock} profile={mainProfile} zLane={-0.72} visible={guides} />
+          <FrontalArea clock={clock} profile={errorProfile} zLane={0.72} visible={guides} />
         </>
       ) : (
         <>
-          {ghostMode ? (
+          {ghost ? (
             <Swimmer profile={ghostProfile} clock={clock} ghost zLane={-0.62} />
           ) : null}
           <Swimmer
             profile={mainProfile}
             clock={clock}
             highlight={highlight}
-            errorTint={formMode === 'error'}
+            errorTint={mode === 'error'}
             target={target}
             onHud={publishHud}
           />
           <Splash clock={clock} profile={mainProfile} />
           <Wake clock={clock} profile={mainProfile} />
-          <FrontalArea clock={clock} profile={mainProfile} visible={showGuides} />
+          <FrontalArea clock={clock} profile={mainProfile} visible={guides} />
         </>
       )}
 
       <Bubbles clock={clock} profile={mainProfile} target={target} />
-      <GuideLine target={target} visible={showGuides} />
+      <GuideLine target={target} visible={guides} />
     </>
   );
 }
 
-export function PoolCanvas(props) {
+export function PoolCanvas() {
   return (
     <Canvas
       className="h-full w-full touch-none"
@@ -142,7 +128,7 @@ export function PoolCanvas(props) {
       }}
     >
       <Suspense fallback={null}>
-        <Scene {...props} />
+        <Scene />
       </Suspense>
     </Canvas>
   );

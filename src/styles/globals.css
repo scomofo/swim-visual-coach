@@ -1,37 +1,64 @@
 @import "tailwindcss";
 
-html,
-body,
-#root {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
-  padding: 0;
+@theme {
+  --color-bg: #061018;
+  --color-surface: #0b1c26;
+  --color-surface-2: #102430;
+  --color-fg: #e7f0f3;
+  --color-muted: #8aa0aa;
+  --color-accent: #8fd0c8;
+  --color-accent-fg: #061018;
+  --color-warn: #d4a07a;
+  --color-border: color-mix(in oklab, #e7f0f3 12%, transparent);
+  --color-border-strong: color-mix(in oklab, #e7f0f3 22%, transparent);
+
+  --font-sans: "Outfit", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Fraunces", "Times New Roman", serif;
+
+  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-border-hover: 0 0 0 1px rgba(255, 255, 255, 0.13);
 }
 
-body {
-  font-family: Inter, system-ui, sans-serif;
-  background: #020617;
-  color: white;
-}
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
 
-* { box-sizing: border-box; }
+  body {
+    font-family: var(--font-sans);
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
 
-button {
-  cursor: pointer;
-}
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
 
-button:disabled {
-  cursor: not-allowed;
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

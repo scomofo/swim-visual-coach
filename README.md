@@ -31,6 +31,7 @@ Pull requests run the full check suite on Node.js 20 and 22.
 - Interactive lesson progression
 - Breathing and rhythm coaching
 - Playback, camera, and guide controls
+- Spoken drill narration with a selectable voice (turn on **Narrate**, then pick a voice; the choice is remembered)
 - Adaptive coaching scaffolding
 - Export-ready lesson cards
 

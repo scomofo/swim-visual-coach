@@ -45,6 +45,7 @@ afterEach(() => {
     ghost: false,
     guides: true,
     audio: false,
+    voice: null,
     focus: false,
     highlight: null,
     completed: {},

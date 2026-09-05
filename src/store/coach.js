@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { DRILLS, DRILL_ORDER } from '../data/drills';
 import { IDLE_DRAG } from '../lib/swim/drag';
+import { loadStoredVoice, storeVoice } from '../lib/narration';
 
 export const PROGRESS_KEY = 'swim-visual-coach-progress-v3';
 export const LEGACY_PROGRESS_KEY = 'swim-visual-coach-progress-v2';
@@ -28,6 +29,7 @@ export const useCoach = create((set, get) => ({
   ghost: false,
   guides: true,
   audio: false,
+  voice: null,
   focus: false,
   highlight: null,
   completed: {},
@@ -48,14 +50,12 @@ export const useCoach = create((set, get) => ({
     } catch {
       // Storage restrictions must not prevent practice in memory.
     }
-    try {
-      if (Object.keys(completed).length > 0) {
-        window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(completed));
-      }
-    } catch {
-      // Recovered progress is still usable when storage is read-only or full.
-    }
-    set({ hydrated: true, completed, showOnboarding });
+    set({
+      hydrated: true,
+      completed,
+      showOnboarding: localStorage.getItem(ONBOARD_KEY) !== '1',
+      voice: loadStoredVoice(),
+    });
   },
   setDrill: (id) =>
     set({
@@ -73,6 +73,11 @@ export const useCoach = create((set, get) => ({
   setGhost: (ghost) => set({ ghost }),
   setGuides: (guides) => set({ guides }),
   setAudio: (audio) => set({ audio }),
+  setVoice: (voice) => {
+    const next = voice || null;
+    set({ voice: next });
+    storeVoice(next);
+  },
   setFocus: (focus) => set({ focus }),
   setHighlight: (cue) => set({ highlight: cue }),
   markComplete: (id) => {

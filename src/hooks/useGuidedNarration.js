@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { speak } from '../lib/narration';
 
 const PHRASES = {
   superman: 'Release the neck. Let the body lengthen quietly.',
@@ -8,22 +9,14 @@ const PHRASES = {
   breathing: 'Roll to breathe. Do not lift the head.',
 };
 
-export default function useGuidedNarration(enabled) {
-  const speakDrill = useCallback((drill) => {
-    if (!enabled || !window.speechSynthesis) return;
-
-    const text = PHRASES[drill];
-
-    if (!text) return;
-
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.88;
-    utterance.pitch = 0.92;
-
-    window.speechSynthesis.speak(utterance);
-  }, [enabled]);
+export default function useGuidedNarration(enabled, voiceURI = null) {
+  const speakDrill = useCallback(
+    (drill) => {
+      if (!enabled) return;
+      speak(PHRASES[drill], { voiceURI });
+    },
+    [enabled, voiceURI],
+  );
 
   return {
     speakDrill,

@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { evaluateDrag } from "../../lib/swim/drag";
 import { evaluatePose } from "../../lib/swim/pose";
+import { usePlaybackFrame } from "../../hooks/usePlaybackFrame";
 function Bubbles({
   clock: _clock,
   profile,
@@ -19,11 +20,11 @@ function Bubbles({
     }
     return a;
   }, []);
-  useFrame((_, dt) => {
+  usePlaybackFrame((_, dt) => {
     const points = ref.current;
     if (!points) return;
     const arr = points.geometry.attributes.position.array;
-    const d = Math.min(dt, 0.1);
+    const d = dt;
     const t = target.current;
     const intensity = 0.35 + profile.splash * 0.8;
     for (let i = 0; i < n; i++) {
@@ -35,7 +36,7 @@ function Bubbles({
       }
     }
     points.geometry.attributes.position.needsUpdate = true;
-  });
+  }, { ambient: true });
   return <points ref={ref}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
@@ -62,11 +63,11 @@ function Splash({
   const life = useRef(new Float32Array(n));
   const prevRight = useRef(false);
   const prevLeft = useRef(false);
-  useFrame((_, dt) => {
+  usePlaybackFrame((_, dt) => {
     const points = ref.current;
     if (!points) return;
     const pose = evaluatePose(profile, clock.current, zLane);
-    const d = Math.min(dt, 0.1);
+    const d = dt;
     const arr = points.geometry.attributes.position.array;
     const vel = velocities.current;
     const burst = (x, z) => {
@@ -101,7 +102,7 @@ function Splash({
       life.current[i] -= d * (1.6 + (1 - profile.splash));
     }
     points.geometry.attributes.position.needsUpdate = true;
-  });
+  }, { ambient: true });
   return <points ref={ref}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
@@ -134,12 +135,12 @@ function Wake({
   }, []);
   const life = useRef(new Float32Array(n));
   const spawn = useRef(0);
-  useFrame((_, dt) => {
+  usePlaybackFrame((_, dt) => {
     const points = ref.current;
     if (!points) return;
     const pose = evaluatePose(profile, clock.current, zLane);
     const drag = evaluateDrag(profile, pose);
-    const d = Math.min(dt, 0.1);
+    const d = dt;
     const arr = points.geometry.attributes.position.array;
     const spread = 0.08 + drag.area * 0.55 + drag.wave * 0.35;
     const rate = 8 + drag.total * 42;
@@ -177,7 +178,7 @@ function Wake({
       mat.current.opacity = 0.22 + drag.total * 0.4;
       mat.current.color.set(drag.total > 0.55 ? "#d4a07a" : "#b7ddd8");
     }
-  });
+  }, { ambient: true });
   return <points ref={ref} renderOrder={2}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />

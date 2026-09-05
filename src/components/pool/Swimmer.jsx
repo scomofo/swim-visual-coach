@@ -132,8 +132,8 @@ function Swimmer({
       );
     }
     onHud?.(pose.phaseName, profile.spl, pose);
-  });
-  return <group ref={bind("root")} position={[6.2, 0.12, 0]} scale={1.14} renderOrder={2}>
+  }, -1);
+  return <group name={ghost ? "ghost-swimmer" : errorTint ? "error-swimmer" : "efficient-swimmer"} ref={bind("root")} position={[6.2, 0.12, 0]} scale={1.14} renderOrder={2}>
       <group ref={bind("hips")}>
         <mesh
           position={[0.04, 0, 0]}

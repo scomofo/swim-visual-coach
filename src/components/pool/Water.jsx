@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { usePlaybackFrame } from "../../hooks/usePlaybackFrame";
 const waterVert = (
   /* glsl */
   `
@@ -77,11 +77,10 @@ function Water() {
   const floorMat = useRef(null);
   const waterUniforms = useMemo(() => ({ uTime: { value: 0 } }), []);
   const floorUniforms = useMemo(() => ({ uTime: { value: 0 } }), []);
-  useFrame((_, dt) => {
-    const d = Math.min(dt, 0.1);
-    if (waterMat.current) waterMat.current.uniforms.uTime.value += d;
-    if (floorMat.current) floorMat.current.uniforms.uTime.value += d;
-  });
+  usePlaybackFrame((_, dt) => {
+    if (waterMat.current) waterMat.current.uniforms.uTime.value += dt;
+    if (floorMat.current) floorMat.current.uniforms.uTime.value += dt;
+  }, { ambient: true });
   return <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[12.5, 0, 0]} renderOrder={1}>
         <planeGeometry args={[28, 5.2, 80, 28]} />

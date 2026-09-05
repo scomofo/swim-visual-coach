@@ -25,9 +25,16 @@ function useNarration() {
 function useHotkeys() {
   useEffect(() => {
     const onKey = (e) => {
-      const tag = e.target?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.target instanceof Element && e.target.closest(
+        'button, a[href], input, textarea, select, [role="button"], [role="slider"], [role="tab"], [contenteditable]:not([contenteditable="false"])',
+      )) return;
       const s = useCoach.getState();
+      if (s.showOnboarding) return;
+      if (e.repeat) {
+        if (e.code === 'Space') e.preventDefault();
+        return;
+      }
       if (e.code === 'Space') {
         e.preventDefault();
         s.togglePlaying();
@@ -40,9 +47,11 @@ function useHotkeys() {
       else if (e.key === 'c' || e.key === 'C') s.setMode('correct');
       else if (e.key === 'e' || e.key === 'E') s.setMode('error');
       else if (e.key === 'ArrowRight') {
+        e.preventDefault();
         const next = DRILL_ORDER[DRILL_ORDER.indexOf(s.drill) + 1];
         if (next) s.setDrill(next);
       } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
         const prev = DRILL_ORDER[DRILL_ORDER.indexOf(s.drill) - 1];
         if (prev) s.setDrill(prev);
       }
@@ -54,13 +63,18 @@ function useHotkeys() {
 
 function useReducedMotionPause() {
   useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const apply = () => {
-      if (media.matches) useCoach.getState().setPlaying(false);
+      useCoach.getState().setReducedMotion(media.matches);
     };
     apply();
-    media.addEventListener('change', apply);
-    return () => media.removeEventListener('change', apply);
+    if (media.addEventListener) {
+      media.addEventListener('change', apply);
+      return () => media.removeEventListener('change', apply);
+    }
+    media.addListener(apply);
+    return () => media.removeListener(apply);
   }, []);
 }
 

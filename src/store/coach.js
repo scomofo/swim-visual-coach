@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { DRILLS } from '../data/drills';
 import { IDLE_DRAG } from '../lib/swim/drag';
+import { loadStoredVoice, storeVoice } from '../lib/narration';
 
 export const PROGRESS_KEY = 'swim-visual-coach-progress-v3';
 export const ONBOARD_KEY = 'swim-visual-coach-onboard-v1';
@@ -14,6 +15,7 @@ export const useCoach = create((set, get) => ({
   ghost: false,
   guides: true,
   audio: false,
+  voice: null,
   focus: false,
   highlight: null,
   completed: {},
@@ -36,6 +38,7 @@ export const useCoach = create((set, get) => ({
       hydrated: true,
       completed,
       showOnboarding: localStorage.getItem(ONBOARD_KEY) !== '1',
+      voice: loadStoredVoice(),
     });
   },
   setDrill: (id) =>
@@ -52,6 +55,11 @@ export const useCoach = create((set, get) => ({
   setGhost: (ghost) => set({ ghost }),
   setGuides: (guides) => set({ guides }),
   setAudio: (audio) => set({ audio }),
+  setVoice: (voice) => {
+    const next = voice || null;
+    set({ voice: next });
+    storeVoice(next);
+  },
   setFocus: (focus) => set({ focus }),
   setHighlight: (cue) => set({ highlight: cue }),
   markComplete: (id) => {

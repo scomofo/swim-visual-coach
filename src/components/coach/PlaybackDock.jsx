@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useCoach } from '../../store/coach';
+import { VoicePicker } from './VoicePicker';
 
 const SPEEDS = [0.25, 0.5, 1, 1.5];
 const CAMERAS = [
@@ -132,6 +133,7 @@ export function PlaybackDock() {
             Narrate
           </span>
         </Chip>
+        {audio ? <VoicePicker /> : null}
         <Chip active={focus} onClick={() => setFocus(!focus)}>
           <span className="inline-flex items-center gap-1.5">
             {focus ? (

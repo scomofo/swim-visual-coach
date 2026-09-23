@@ -156,6 +156,31 @@ const PROFILES = {
       rushed
     )
   },
+  sweetSpot: {
+    correct: make("skate", {
+      cycle: 9,
+      speed: 0.3,
+      bothForward: false,
+      spl: 6,
+      breathEvery: 0,
+      kickAmp: 0.03,
+      kickHz: 0.4,
+      roll: 0.66,
+      splash: 0.05
+    }),
+    error: make(
+      "skate",
+      {
+        cycle: 5,
+        speed: 0.18,
+        bothForward: false,
+        spl: 12,
+        breathEvery: 0,
+        roll: 0.3
+      },
+      rushed
+    )
+  },
   singleSwitch: {
     correct: make("single", {
       cycle: 7.2,
@@ -194,6 +219,33 @@ const PROFILES = {
         bothForward: false,
         spl: 24,
         breathEvery: 0
+      },
+      rushed
+    )
+  },
+  twoBeatKick: {
+    correct: make("single", {
+      cycle: 7.6,
+      speed: 0.85,
+      bothForward: false,
+      spl: 12,
+      breathEvery: 0,
+      roll: 0.56,
+      kickAmp: 0.1,
+      kickHz: 0.85,
+      kickSplay: 0.02,
+      splash: 0.14
+    }),
+    error: make(
+      "single",
+      {
+        cycle: 4.2,
+        speed: 0.45,
+        bothForward: false,
+        spl: 22,
+        breathEvery: 0,
+        kickAmp: 0.32,
+        kickHz: 3.2
       },
       rushed
     )

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import useGuidedPractice, { GUIDED_SEQUENCE } from './useGuidedPractice';
 
 describe('useGuidedPractice', () => {
-  it('includes the comparison drill as the twelfth and final step', () => {
+  it('includes the comparison drill as the fourteenth and final step', () => {
     const setDrill = vi.fn();
     const markComplete = vi.fn();
     const { result } = renderHook(() => useGuidedPractice({
@@ -12,9 +12,9 @@ describe('useGuidedPractice', () => {
       markComplete,
     }));
 
-    expect(GUIDED_SEQUENCE).toHaveLength(12);
-    expect(result.current.sessionStep).toBe(12);
-    expect(result.current.totalSteps).toBe(12);
+    expect(GUIDED_SEQUENCE).toHaveLength(14);
+    expect(result.current.sessionStep).toBe(14);
+    expect(result.current.totalSteps).toBe(14);
     expect(result.current.isLastStep).toBe(true);
 
     act(() => result.current.advance());

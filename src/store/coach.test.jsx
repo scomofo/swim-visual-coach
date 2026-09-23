@@ -12,7 +12,7 @@ describe('saved mastery', () => {
     localStorage.setItem(PROGRESS_KEY, JSON.stringify({ comparison: true }));
     render(<App />);
 
-    expect(screen.getByText('3 / 12 mastered')).toBeInTheDocument();
+    expect(screen.getByText('3 / 14 mastered')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Mastered' })).toBeDisabled();
     expect(JSON.parse(localStorage.getItem(PROGRESS_KEY))).toEqual({
       superman: true, flutter: true, comparison: true,
@@ -43,7 +43,7 @@ describe('saved mastery', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Begin practice' }));
     fireEvent.click(screen.getByRole('button', { name: 'Mark mastered' }));
-    expect(screen.getByText('1 / 12 mastered')).toBeInTheDocument();
+    expect(screen.getByText('1 / 14 mastered')).toBeInTheDocument();
     getItem.mockRestore();
     setItem.mockRestore();
   });

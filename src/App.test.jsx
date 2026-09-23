@@ -15,13 +15,13 @@ describe('App curriculum and layout', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Efficient vs Rushed/ }));
 
-    expect(screen.getByText(/0\s*\/\s*12 mastered/)).toBeInTheDocument();
+    expect(screen.getByText(/0\s*\/\s*14 mastered/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Next drill' })).toBeDisabled();
 
     fireEvent.click(screen.getByRole('button', { name: 'Mark mastered' }));
 
     await waitFor(() => {
-      expect(screen.getByText(/1\s*\/\s*12 mastered/)).toBeInTheDocument();
+      expect(screen.getByText(/1\s*\/\s*14 mastered/)).toBeInTheDocument();
     });
     expect(screen.getByRole('button', { name: 'Mastered' })).toBeDisabled();
   });

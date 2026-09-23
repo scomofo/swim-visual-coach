@@ -50,10 +50,16 @@ export const useCoach = create((set, get) => ({
     } catch {
       // Storage restrictions must not prevent practice in memory.
     }
+    try {
+      // Persist the merged snapshot without deleting the legacy recovery copy.
+      window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(completed));
+    } catch {
+      // Storage restrictions must not prevent migrated progress being used.
+    }
     set({
       hydrated: true,
       completed,
-      showOnboarding: localStorage.getItem(ONBOARD_KEY) !== '1',
+      showOnboarding,
       voice: loadStoredVoice(),
     });
   },

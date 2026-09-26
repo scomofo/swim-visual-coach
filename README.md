@@ -42,13 +42,15 @@ Pull requests run the full check suite on Node.js 20 and 22.
 3. Chest Press → Hip Rise
 4. Skating Position
 5. Head Roll Breathing
-6. Single Switch
-7. Triple Switch
-8. Rhythm Swim
-9. Continuous Flow
-10. Stroke Count Efficiency
-11. Effortless 25
-12. Efficient vs Rushed
+6. Sweet Spot
+7. Single Switch
+8. Triple Switch
+9. Two-Beat Kick
+10. Rhythm Swim
+11. Continuous Flow
+12. Stroke Count Efficiency
+13. Effortless 25
+14. Efficient vs Rushed
 
 ## Hydrodynamic drag
 

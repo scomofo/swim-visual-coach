@@ -20,7 +20,7 @@ export const DRILLS = {
     id: 'superman',
     title: 'Superman Glide',
     phase: 'Balance',
-    description: 'Release the neck. Look down. Press the chest gently. Let the hips float.',
+    description: 'Push off the wall and stretch into a long, quiet glide. Let your head hang heavy between your shoulders, eyes looking straight down at the bottom — never forward. Press your chest gently into the water, as if leaning on a buoy, and feel your hips and legs rise toward the surface behind you. You should feel as if you’re swimming slightly downhill, the water holding you up without any effort from your legs. The pitfall is looking forward or lifting the head: the moment your eyes come up, your hips sink and the glide dies.',
     tags: [
       { label: 'Heavy head', cue: 'head' },
       { label: 'Eyes down', cue: 'head' },
@@ -35,7 +35,7 @@ export const DRILLS = {
     id: 'flutter',
     title: 'Lazy Flutter',
     phase: 'Balance',
-    description: 'Add a tiny effortless flutter kick while preserving balance and silence.',
+    description: 'From your Superman glide, add the smallest flutter kick you can manage — a whisper of motion from the hips, not the knees. Your legs should trail behind you like a long tail, toes relaxed, barely dimpling the surface. The kick exists only to keep the glide alive a little longer; it never holds your body up, and balance still comes from your head and chest. If you hear splashing or feel your thighs burning, you’re kicking too hard — shrink the kick until the water goes silent again.',
     tags: [
       { label: 'Tiny kick', cue: 'kick' },
       { label: 'No splash', cue: 'kick' },
@@ -50,7 +50,7 @@ export const DRILLS = {
     id: 'chestPress',
     title: 'Chest Press → Hip Rise',
     phase: 'Balance',
-    description: 'Cooperate with gravity by pressing the chest — your buoy — gently and allowing the hips to rise.',
+    description: 'Cooperate with gravity instead of fighting it. From the glide, press your buoy — your chest — gently down into the water, the way you’d lean onto a beach ball. As your chest goes down, your hips and legs rise toward the surface like the other end of a seesaw. You should feel the slope: head low, hips high, water streaming past with no kicking at all. The mistake is muscling it — a hard shove or a frantic kick. The press is subtle; let the water do the lifting.',
     tags: [
       { label: 'Chest pressure', cue: 'chest' },
       { label: 'Hips rise', cue: 'hips' },
@@ -65,7 +65,7 @@ export const DRILLS = {
     id: 'skating',
     title: 'Skating Position',
     phase: 'Streamline',
-    description: 'Rotate onto the side and shape a long narrow vessel through the water.',
+    description: 'Roll onto your side and become a long, narrow vessel. Your lower shoulder tucks toward your chin, your lead arm stretches patiently ahead in the front quadrant, and your head rests in the pocket between shoulder and arm. From the side you should feel hidden from the water — no wide, flat chest plowing forward, just a sleek hull slipping through. Rotate quietly from the core, never yanking with the shoulders. The pitfall is rushing: if your lead arm drops or your body flattens out, pause, reset, and skate again.',
     tags: [
       { label: 'Side balance', cue: 'hips' },
       { label: 'Patient lead arm', cue: 'arm' },
@@ -80,7 +80,7 @@ export const DRILLS = {
     id: 'breathing',
     title: 'Head Roll Breathing',
     phase: 'Streamline',
-    description: 'Rotate the head smoothly with the body while keeping one goggle in the water.',
+    description: 'Breathing is a roll, not a lift. As your body rotates toward the skating position, let your head ride along with it — keep one goggle in the water and turn your chin just enough to find air. Your mouth clears the surface because the body rolled, not because the head came up. The moment you lift your head, your hips drop and the stroke falls apart. Practice it slowly: roll, sip air, and return your face to the water with your balance undisturbed.',
     tags: [
       { label: 'One goggle', cue: 'head' },
       { label: 'No head lift', cue: 'head' },
@@ -95,7 +95,7 @@ export const DRILLS = {
     id: 'sweetSpot',
     title: 'Sweet Spot',
     phase: 'Streamline',
-    description: 'Settle into TI’s sweet spot: a side-balance rest position, cheek on the water, lower shoulder to chin. A full stop that keeps balance without effort.',
+    description: 'The sweet spot is your home base: a side-balance position so stable you could rest there indefinitely. Cheek on the water, lower shoulder tucked to your chin, lead arm extended, body rolled to the side — and then a full stop. No kicking, no stroking, no effort. You should feel completely supported, breathing easily, the water holding you. Whenever your form slips in any drill, come back here and rebuild from stillness. If you can’t rest here comfortably, your balance needs work before anything else.',
     tags: [
       { label: 'Full stop', cue: 'hips' },
       { label: 'Cheek on water', cue: 'head' },
@@ -110,7 +110,7 @@ export const DRILLS = {
     id: 'singleSwitch',
     title: 'Single Switch',
     phase: 'Core Propulsion',
-    description: 'Slide the recovering hand through the mail slot, anchor it with a high elbow, and rotate the core to the opposite skate.',
+    description: 'From the sweet spot, slide your recovering hand forward through the mail slot — fingertips entering the water just ahead of your goggles — and set a high elbow as your hand anchors. Then let your core do the work: rotate your torso around that anchored hand to the opposite skate, hips and shoulders rolling as one unit. Your hand holds still water while your body moves past it. The cardinal error is pressing water back past the hip — that pushes you up, not forward. Anchor, rotate, and arrive in a balanced skate before doing anything else.',
     tags: [
       { label: 'Mail slot', cue: 'arm' },
       { label: 'Anchor the hand', cue: 'arm' },
@@ -125,7 +125,7 @@ export const DRILLS = {
     id: 'tripleSwitch',
     title: 'Triple Switch',
     phase: 'Core Propulsion',
-    description: 'Chain three smooth switches together — anchoring each hand with a high elbow — before settling into a balanced glide.',
+    description: 'Chain three single switches together: skate, switch, skate, switch, skate, switch — then settle into a long, balanced glide. Each switch follows the same sequence: quiet mail-slot entry, high elbow anchor, core-driven rotation to the other side. The challenge is patience between switches; let each skate fully arrive before starting the next. Rushing turns the drill into windmilling. Keep every hand anchored, never press water past the hip, and finish with a glide long enough to feel what all that patience bought you.',
     tags: [
       { label: 'R-L-R rhythm', cue: 'arm' },
       { label: 'Anchor each hand', cue: 'arm' },
@@ -140,7 +140,7 @@ export const DRILLS = {
     id: 'twoBeatKick',
     title: 'Two-Beat Kick',
     phase: 'Core Propulsion',
-    description: 'Time a single downbeat of the leg to the entry of the opposite spearing arm. The kick starts rotation; it does not propel.',
+    description: 'Time a single downbeat of the leg to the entry of the opposite spearing arm — right hand spears, left leg kicks down, and vice versa. Two kicks per full stroke cycle, nothing more. The kick does not propel you; it starts the body’s rotation, like a drummer’s count-in starting the song. You should feel the kick and the hand entry land together, the torso rolling as one piece. The pitfall is kicking for speed — a busy flutter here just adds noise. One quiet downbeat, perfectly timed, is the whole drill.',
     tags: [
       { label: 'Entry timing', cue: 'kick' },
       { label: 'One downbeat', cue: 'kick' },
@@ -155,7 +155,7 @@ export const DRILLS = {
     id: 'rhythm',
     title: 'Rhythm Swim',
     phase: 'Integration',
-    description: 'Discover an unhurried rhythm with smooth rotation and patient lead-arm timing.',
+    description: 'Swim whole-stroke at a tempo that feels almost too slow. Let each piece arrive in order — skate, patient lead arm, quiet switch, timed kick — without hurrying any of them. Your breathing should stay relaxed and your stroke should feel metronomic, the same unhurried cadence length after length. TI swimmers often train this with a Tempo Trainer beeping under the cap; here, find the beat internally. If the water gets noisy or your breathing shortens, you’re rushing — slow the tempo until silence returns.',
     tags: [
       { label: 'Unhurried tempo', cue: 'chest' },
       { label: 'Flow state', cue: 'hips' },
@@ -170,7 +170,7 @@ export const DRILLS = {
     id: 'continuousFlow',
     title: 'Continuous Flow',
     phase: 'Integration',
-    description: 'Connect balance, breathing, and switching into uninterrupted whole-stroke motion.',
+    description: 'Connect everything into uninterrupted whole-stroke swimming. Balance from the Superman drills, side-streamline from skating, breathing from the head roll, drive from anchored switches and the two-beat kick — all flowing without pauses or dead spots. Nothing new is added here; the skill is continuity. Keep the recovery relaxed, the entries quiet, and the rotation smooth. The trap is adding intensity now that you’re ’really swimming.’ Don’t. Same calm effort as the drills, just without stopping.',
     tags: [
       { label: 'Continuous motion', cue: 'arm' },
       { label: 'Quiet flow', cue: 'hips' },
@@ -185,7 +185,7 @@ export const DRILLS = {
     id: 'spl',
     title: 'Stroke Count Efficiency',
     phase: 'Metrics',
-    description: 'Play swimming golf: visualize how patient movement reduces drag and lowers stroke count per length.',
+    description: 'Play swimming golf: count your strokes per length and try to lower the number. SPL — strokes per length — is your efficiency scorecard. Take fewer strokes by holding each lead arm patiently in the front quadrant, gliding farther on every switch, and refusing to rush. Make stroke count your single focal point for the length: if the number spikes, that’s feedback, not failure — slow down, reset your balance, and rebuild. Lower SPL at the same pace means less drag, and less drag is the entire game in Total Immersion.',
     tags: [
       { label: 'Efficiency', cue: 'chest' },
       { label: 'Lower drag', cue: 'hips' },
@@ -200,7 +200,7 @@ export const DRILLS = {
     id: 'effortless25',
     title: 'Effortless 25',
     phase: 'Graduation',
-    description: 'Swim continuously with relaxed breathing, quiet movement, and stable stroke count.',
+    description: 'Swim a full 25 relaxed from wall to wall — quiet water, steady breathing, calm rhythm, and a stroke count that doesn’t climb. This is the graduation test: not speed, not distance, but sustainability. Hold your focal points lightly and let the stroke run itself. The rule that governs everything: if your form slips or your stroke count spikes, stop and rest. Never practice struggling. A clean, easy 25 repeated is worth more than one heroic, ragged length.',
     tags: [
       { label: 'Steady SPL', cue: 'arm' },
       { label: 'Relaxed breathing', cue: 'head' },
@@ -215,7 +215,7 @@ export const DRILLS = {
     id: 'comparison',
     title: 'Efficient vs Rushed',
     phase: 'Diagnostics',
-    description: 'Compare calm streamlined swimming against rushed, high-drag movement.',
+    description: 'Watch the same swimmer twice: once efficient, once rushed. The efficient version is long and narrow, skating on its side with a patient lead arm and two quiet kicks per cycle, barely a ripple on the surface. The rushed version is flat and wide, head up, arms windmilling, legs churning white water — working twice as hard to go slower. Turbulence is information: splash, noise, and sinking legs all point to excess effort. Your job is to spot the differences, then feel in your own swimming which version you’re practicing.',
     tags: [
       { label: 'Drag comparison', cue: 'hips' },
       { label: 'Silent water', cue: 'kick' },

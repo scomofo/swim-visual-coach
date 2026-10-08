@@ -40,7 +40,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DEPLOY_TARGET: gh-pages
-      SWIM_QA_DIR: ${{ runner.temp }}/swim-qa
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -61,4 +60,6 @@ jobs:
         run: npm run build
 
       - name: Exercise the production app in Chromium
+        env:
+          SWIM_QA_DIR: ${{ runner.temp }}/swim-qa
         run: npm run test:browser

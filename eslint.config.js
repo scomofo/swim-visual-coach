@@ -27,7 +27,12 @@ export default [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
-  { files: ['scripts/**/*.mjs'], languageOptions: { globals: globals.node }, rules: js.configs.recommended.rules },
+  {
+    files: ['scripts/**/*.mjs'],
+    // Playwright evaluate callbacks execute in the page's browser context.
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    rules: js.configs.recommended.rules,
+  },
   {
     files: ['*.config.js'],
     languageOptions: {

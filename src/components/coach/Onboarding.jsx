@@ -23,8 +23,13 @@ export function Onboarding() {
   const startButton = useRef(null);
   const wasOpen = useRef(false);
   useEffect(() => {
-    if (open) { startButton.current?.focus(); wasOpen.current = true; }
-    else if (wasOpen.current) { document.getElementById('practice-title')?.focus(); wasOpen.current = false; }
+    if (open) {
+      startButton.current?.focus();
+      wasOpen.current = true;
+    } else if (wasOpen.current) {
+      document.getElementById('practice-title')?.focus();
+      wasOpen.current = false;
+    }
   }, [open]);
   if (!open) return null;
 
@@ -34,7 +39,12 @@ export function Onboarding() {
         role="dialog"
         aria-modal="true"
         aria-describedby="onboard-description"
-        onKeyDown={(event) => { if (event.key === 'Tab') { event.preventDefault(); startButton.current?.focus(); } }}
+        onKeyDown={(event) => {
+          if (event.key === 'Tab') {
+            event.preventDefault();
+            startButton.current?.focus();
+          }
+        }}
         aria-labelledby="onboard-title"
         className="onboarding-card w-full max-w-lg rounded-2xl bg-surface p-6 shadow-[var(--shadow-border)] sm:p-8"
       >
@@ -50,14 +60,23 @@ export function Onboarding() {
         >
           Swim calmly. Learn visually.
         </h2>
-        <p id="onboard-description" className="mt-3 text-sm leading-6 text-muted">
-          Explore 14 visual lessons in balance, breathing, and rhythm.
-          Watch at your own pace, compare forms, and take one cue to your next swim.
+        <p
+          id="onboard-description"
+          className="mt-3 text-sm leading-6 text-muted"
+        >
+          Explore 14 visual lessons in balance, breathing, and rhythm. Watch at
+          your own pace, compare forms, and take one cue to your next swim.
         </p>
         <div className="mt-6 grid gap-3">
           {STEPS.map((step, index) => (
-            <div key={step.title} className="onboarding-step rounded-lg bg-surface-2 px-4 py-3">
-              <div className="text-sm font-medium text-fg"><span className="mr-3 text-xs text-accent">0{index + 1}</span>{step.title}</div>
+            <div
+              key={step.title}
+              className="onboarding-step rounded-lg bg-surface-2 px-4 py-3"
+            >
+              <div className="text-sm font-medium text-fg">
+                <span className="mr-3 text-xs text-accent">0{index + 1}</span>
+                {step.title}
+              </div>
               <p className="mt-1 text-sm leading-6 text-muted">{step.body}</p>
             </div>
           ))}
@@ -68,7 +87,8 @@ export function Onboarding() {
           onClick={close}
           className="mt-7 flex items-center justify-center gap-3 h-12 w-full rounded-md bg-accent text-sm font-medium text-accent-fg transition-transform duration-150 ease-out active:scale-[0.96]"
         >
-          Begin practice<ArrowRight className="size-4" aria-hidden="true" />
+          Begin practice
+          <ArrowRight className="size-4" aria-hidden="true" />
         </button>
       </div>
     </div>

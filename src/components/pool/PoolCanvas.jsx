@@ -20,6 +20,7 @@ export function PoolScene() {
   const guides = useCoach((s) => s.guides);
   const highlight = useCoach((s) => s.highlight);
   const setHud = useCoach((s) => s.setHud);
+  const playbackRevision = useCoach((s) => s.playbackRevision);
 
   const clock = useRef(0);
   const hudTick = useRef(0);
@@ -44,7 +45,8 @@ export function PoolScene() {
 
   useEffect(() => {
     clock.current = 0;
-  }, [drill, mode]);
+    hudTick.current = 7;
+  }, [drill, mode, playbackRevision]);
 
   usePlaybackFrame((_, dt) => {
     clock.current += dt;
@@ -129,8 +131,8 @@ export function PoolCanvas() {
       onCreated={({ gl, scene }) => {
         gl.setClearColor('#061018');
         gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.0;
-        scene.fog = new THREE.Fog('#071820', 16, 38);
+        gl.toneMappingExposure = 1.1;
+        scene.fog = new THREE.Fog('#123440', 18, 40);
       }}
     >
       <Suspense fallback={null}>

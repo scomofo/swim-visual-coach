@@ -27,6 +27,7 @@ export default [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  { files: ['scripts/**/*.mjs'], languageOptions: { globals: globals.node }, rules: js.configs.recommended.rules },
   {
     files: ['*.config.js'],
     languageOptions: {

@@ -1,4 +1,5 @@
-import { Waves } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { ArrowRight, Waves } from 'lucide-react';
 import { useCoach } from '../../store/coach';
 
 const STEPS = [
@@ -19,14 +20,23 @@ const STEPS = [
 export function Onboarding() {
   const open = useCoach((s) => s.showOnboarding);
   const close = useCoach((s) => s.closeOnboarding);
+  const startButton = useRef(null);
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (open) { startButton.current?.focus(); wasOpen.current = true; }
+    else if (wasOpen.current) { document.getElementById('practice-title')?.focus(); wasOpen.current = false; }
+  }, [open]);
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-bg/80 p-4 backdrop-blur-sm sm:items-center">
       <div
         role="dialog"
+        aria-modal="true"
+        aria-describedby="onboard-description"
+        onKeyDown={(event) => { if (event.key === 'Tab') { event.preventDefault(); startButton.current?.focus(); } }}
         aria-labelledby="onboard-title"
-        className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-[var(--shadow-border)] sm:p-8"
+        className="onboarding-card w-full max-w-lg rounded-2xl bg-surface p-6 shadow-[var(--shadow-border)] sm:p-8"
       >
         <div className="flex items-center gap-2 text-accent">
           <Waves className="size-4" strokeWidth={1.75} />
@@ -40,24 +50,25 @@ export function Onboarding() {
         >
           Swim calmly. Learn visually.
         </h2>
-        <p className="mt-3 text-sm leading-6 text-muted">
-          A 3D coaching lane that teaches freestyle through motion, balance, and
-          rhythm — not a pile of cues.
+        <p id="onboard-description" className="mt-3 text-sm leading-6 text-muted">
+          Explore 14 visual lessons in balance, breathing, and rhythm.
+          Watch at your own pace, compare forms, and take one cue to your next swim.
         </p>
         <div className="mt-6 grid gap-3">
-          {STEPS.map((step) => (
-            <div key={step.title} className="rounded-lg bg-surface-2 px-4 py-3">
-              <div className="text-sm font-medium text-fg">{step.title}</div>
+          {STEPS.map((step, index) => (
+            <div key={step.title} className="onboarding-step rounded-lg bg-surface-2 px-4 py-3">
+              <div className="text-sm font-medium text-fg"><span className="mr-3 text-xs text-accent">0{index + 1}</span>{step.title}</div>
               <p className="mt-1 text-sm leading-6 text-muted">{step.body}</p>
             </div>
           ))}
         </div>
         <button
           type="button"
+          ref={startButton}
           onClick={close}
-          className="mt-7 h-12 w-full rounded-md bg-accent text-sm font-medium text-accent-fg transition-transform duration-150 ease-out active:scale-[0.96]"
+          className="mt-7 flex items-center justify-center gap-3 h-12 w-full rounded-md bg-accent text-sm font-medium text-accent-fg transition-transform duration-150 ease-out active:scale-[0.96]"
         >
-          Begin practice
+          Begin practice<ArrowRight className="size-4" aria-hidden="true" />
         </button>
       </div>
     </div>

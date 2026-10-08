@@ -6,6 +6,7 @@ import { loadStoredVoice, storeVoice } from '../lib/narration';
 export const PROGRESS_KEY = 'swim-visual-coach-progress-v3';
 export const LEGACY_PROGRESS_KEY = 'swim-visual-coach-progress-v2';
 export const ONBOARD_KEY = 'swim-visual-coach-onboard-v1';
+export const SESSION_KEY = 'swim-visual-coach-last-drill-v1';
 
 function readProgress(key) {
   try {
@@ -23,6 +24,7 @@ export const useCoach = create((set, get) => ({
   drill: 'superman',
   mode: 'correct',
   playing: true,
+  playbackRevision: 0,
   reducedMotion: false,
   speed: 1,
   camera: 'quarter',
@@ -45,8 +47,11 @@ export const useCoach = create((set, get) => ({
     // redesign. The old v1 records included drills that were merely opened.
     const completed = { ...readProgress(LEGACY_PROGRESS_KEY), ...readProgress(PROGRESS_KEY) };
     let showOnboarding = true;
+    let drill = 'superman';
     try {
       showOnboarding = window.localStorage.getItem(ONBOARD_KEY) !== '1';
+      const savedDrill = window.localStorage.getItem(SESSION_KEY);
+      if (DRILL_ORDER.includes(savedDrill)) drill = savedDrill;
     } catch {
       // Storage restrictions must not prevent practice in memory.
     }
@@ -58,22 +63,29 @@ export const useCoach = create((set, get) => ({
     }
     set({
       hydrated: true,
+      drill,
       completed,
       showOnboarding,
       voice: loadStoredVoice(),
     });
   },
-  setDrill: (id) =>
+  setDrill: (id) => {
+    if (!DRILL_ORDER.includes(id)) return;
     set({
       drill: id,
       highlight: null,
       camera: id === 'comparison' ? 'quarter' : get().camera,
-    }),
+    });
+    try { localStorage.setItem(SESSION_KEY, id); } catch {
+      // Practice remains available when the browser cannot save a session.
+    }
+  },
   setMode: (mode) => set({ mode }),
   setPlaying: (playing) => set({ playing }),
   setReducedMotion: (reducedMotion) =>
     set({ reducedMotion, ...(reducedMotion ? { playing: false } : {}) }),
   togglePlaying: () => set({ playing: !get().playing }),
+  restartPlayback: () => set({ playbackRevision: get().playbackRevision + 1 }),
   setSpeed: (speed) => set({ speed }),
   setCamera: (camera) => set({ camera }),
   setGhost: (ghost) => set({ ghost }),
@@ -88,6 +100,7 @@ export const useCoach = create((set, get) => ({
   setHighlight: (cue) => set({ highlight: cue }),
   markComplete: (id) => {
     const key = id ?? get().drill;
+    if (!DRILL_ORDER.includes(key)) return;
     const already = Boolean(get().completed[key]);
     const completed = { ...get().completed, [key]: true };
     set({ completed, celebration: !already });

@@ -47,15 +47,14 @@ function CameraRig({
     const d = Math.min(dt, 0.1);
     const t = target.current;
     writeViewOffset(view, t, desired.current, look.current);
-    if (paired) {
-      // Fit both complete bodies, including on narrow screens, while keeping
-      // the chosen view direction. A common travel speed prevents separation.
+    {
+      // Frame the entire single or paired swimmer while preserving view direction.
       const halfFov = Math.atan(
         Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * Math.min(1, camera.aspect),
       );
       desired.current.sub(look.current).normalize();
-      look.current.set(t.x - 0.25, 0, laneCenter);
-      desired.current.multiplyScalar(1.9 / Math.sin(halfFov)).add(look.current);
+      look.current.set(t.x - 0.25, 0, paired ? laneCenter : t.z);
+      desired.current.multiplyScalar((paired ? 1.9 : 1.55) / Math.sin(halfFov)).add(look.current);
     }
     const wrapped = lastX.current !== null && Math.abs(t.x - lastX.current) > LANE_LENGTH / 2;
     lastX.current = t.x;

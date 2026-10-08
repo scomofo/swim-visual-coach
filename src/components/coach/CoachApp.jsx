@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Waves } from 'lucide-react';
+import { ArrowUpRight, Check, Keyboard, Waves } from 'lucide-react';
 import { DRILLS, DRILL_ORDER } from '../../data/drills';
 import { cancelSpeech, speak } from '../../lib/narration';
 import { cn } from '../../lib/utils';
@@ -9,6 +9,7 @@ import { Onboarding } from './Onboarding';
 import { PlaybackDock } from './PlaybackDock';
 import { DrillRail } from './DrillRail';
 import { DragMeter } from './DragMeter';
+import { LessonPanel } from './LessonPanel';
 
 function useNarration() {
   const audio = useCoach((s) => s.audio);
@@ -26,11 +27,12 @@ function useHotkeys() {
   useEffect(() => {
     const onKey = (e) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      const s = useCoach.getState();
+      if (s.showOnboarding) return;
+      if (e.key === 'Escape' && s.focus) { s.setFocus(false); return; }
       if (e.target instanceof Element && e.target.closest(
         'button, a[href], input, textarea, select, [role="button"], [role="slider"], [role="tab"], [contenteditable]:not([contenteditable="false"])',
       )) return;
-      const s = useCoach.getState();
-      if (s.showOnboarding) return;
       if (e.repeat) {
         if (e.code === 'Space') e.preventDefault();
         return;
@@ -43,7 +45,7 @@ function useHotkeys() {
       else if (e.key === '3') s.setCamera('overhead');
       else if (e.key === '4') s.setCamera('front');
       else if (e.key === '5') s.setCamera('under');
-      else if (e.key === 'g' || e.key === 'G') s.setGhost(!s.ghost);
+      else if ((e.key === 'g' || e.key === 'G') && s.drill !== 'comparison') s.setGhost(!s.ghost);
       else if (e.key === 'c' || e.key === 'C') s.setMode('correct');
       else if (e.key === 'e' || e.key === 'E') s.setMode('error');
       else if (e.key === 'ArrowRight') {
@@ -88,110 +90,73 @@ export function CoachApp() {
   const celebration = useCoach((s) => s.celebration);
   const ghost = useCoach((s) => s.ghost);
   const mode = useCoach((s) => s.mode);
+  const camera = useCoach((s) => s.camera);
+  const playing = useCoach((s) => s.playing);
+  const completed = useCoach((s) => s.completed);
+  const showOnboarding = useCoach((s) => s.showOnboarding);
   const idx = DRILL_ORDER.indexOf(drillId);
-
-  useEffect(() => {
-    hydrate();
-  }, [hydrate]);
-
+  const doneCount = DRILL_ORDER.filter((id) => completed[id]).length;
+  const cameraLabel = { side: 'Side view', quarter: 'Three-quarter view', overhead: 'Overhead view', front: 'Head-on view', under: 'Underwater view' }[camera];
+  useEffect(() => { hydrate(); }, [hydrate]);
   useNarration();
   useHotkeys();
   useReducedMotionPause();
 
   return (
-    <div className="min-h-dvh bg-bg text-fg">
+    <div className="coach-app min-h-dvh bg-bg text-fg">
       <Onboarding />
-
-      {celebration ? (
-        <div
-          role="status"
-          className="pointer-events-none fixed left-1/2 top-20 z-40 -translate-x-1/2 rounded-full bg-accent px-5 py-2 text-sm font-medium text-accent-fg shadow-[var(--shadow-border)]"
-        >
-          Drill mastered
-        </div>
-      ) : null}
-
-      <div
-        className={cn(
-          'mx-auto flex min-h-dvh max-w-[1400px] flex-col gap-4 p-4 pb-6 md:gap-5 md:p-6',
-          focus && 'max-w-none p-3 md:p-4',
-        )}
-      >
-        <header
-          className={cn(
-            'flex flex-col gap-3 md:flex-row md:items-end md:justify-between',
-            focus && 'sr-only',
-          )}
-        >
-          <div>
-            <div className="flex items-center gap-2 text-accent">
-              <Waves className="size-4" strokeWidth={1.75} />
-              <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted">
-                Swim Visual Coach
-              </p>
-            </div>
-            <h1 className="mt-2 font-display text-3xl font-medium tracking-tight text-fg md:text-5xl">
-              {drill.title}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted md:text-base">
-              {drill.description}
-            </p>
+      {celebration && <div role="status" className="mastery-toast pointer-events-none fixed left-1/2 top-6 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-medium text-accent-fg"><Check className="size-4" aria-hidden="true" />Drill mastered</div>}
+      <div inert={showOnboarding || undefined} className={cn('coach-shell', focus && 'is-focused')}>
+        <header hidden={focus} className="app-header">
+          <div className="brand-lockup">
+            <span className="brand-icon"><Waves className="size-6" strokeWidth={1.5} aria-hidden="true" /></span>
+            <div><p className="brand-name">Swim <span>Visual Coach</span></p><p className="brand-caption">Find your flow.</p></div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="rounded-md bg-surface px-3 py-2 tabular-nums text-muted">
-              {String(idx + 1).padStart(2, '0')} · {drill.phase}
-            </span>
+          <div className="header-right">
+            <span className="method-label">Balance. Streamline. Rhythm.</span>
+            <div className="course-progress" aria-label={`${doneCount} of ${DRILL_ORDER.length} drills mastered`}>
+              <span className="progress-ring" style={{ '--progress': `${doneCount / DRILL_ORDER.length * 100}%` }}><Waves className="size-4" aria-hidden="true" /></span>
+              <div><span className="eyebrow">Your practice</span><p>{Math.round(doneCount / DRILL_ORDER.length * 100)}% complete</p></div>
+            </div>
           </div>
         </header>
-
-        <section
-          data-testid="visualization"
-          className={cn(
-            'relative min-h-[420px] overflow-hidden rounded-2xl bg-surface shadow-[var(--shadow-border)]',
-            focus ? 'h-[calc(100dvh-9.5rem)]' : 'h-[clamp(420px,58dvh,640px)]',
-          )}
-        >
-          <LaneView />
-
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-bg/50 to-transparent" />
-
-          <blockquote className="absolute left-4 top-4 mr-52 max-w-xl rounded-lg bg-bg/55 px-4 py-3 text-sm leading-6 text-fg backdrop-blur-sm md:left-5 md:top-5">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">Coach</p>
-            <p className="mt-1 font-display text-base md:text-lg">{drill.coach}</p>
-          </blockquote>
-
-          <DragMeter />
-
-          {ghost && drillId !== 'comparison' ? (
-            <p className="absolute right-3 top-56 max-w-48 rounded-md bg-bg/55 px-3 py-2 text-xs leading-5 text-muted backdrop-blur-sm md:right-5">
-              Ghost shows {mode === 'correct' ? 'the common error' : 'efficient form'}
-            </p>
-          ) : null}
-
-          <div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-2 md:bottom-4 md:left-4 md:right-4">
-            {drill.tags.map((tag) => {
-              const on = highlight === tag.cue;
-              return (
-                <button
-                  key={tag.label}
-                  type="button"
-                  onClick={() => setHighlight(on ? null : tag.cue)}
-                  className={cn(
-                    'h-11 rounded-md px-3 text-sm font-medium backdrop-blur-sm transition-transform duration-150 ease-out active:scale-[0.96]',
-                    on ? 'bg-accent text-accent-fg' : 'bg-bg/55 text-fg hover:bg-bg/70',
-                  )}
-                >
-                  {tag.label}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <PlaybackDock />
-
-        <div className={cn(focus && 'hidden')}>
-          <DrillRail />
+        <div className="workspace">
+          <div hidden={focus} className="curriculum-column"><DrillRail /></div>
+          <main className="practice-column" aria-labelledby="practice-title">
+            <div className={cn('practice-heading', focus && 'sr-only')}>
+              <div>
+                <p className="eyebrow text-accent">Lesson {String(idx + 1).padStart(2, '0')} <span className="text-muted">/ {String(DRILL_ORDER.length).padStart(2, '0')} &nbsp; · &nbsp; {drill.phase}</span></p>
+                <h1 id="practice-title" tabIndex={-1}>{drill.title}</h1>
+                <p className="practice-subtitle">Watch the movement. Notice the difference. Take one cue to the water.</p>
+              </div>
+              <span className="lesson-badge">{completed[drillId] ? <><Check className="size-3.5" aria-hidden="true" />Mastered</> : <><span className="status-dot" />In practice</>}</span>
+            </div>
+            <section data-testid="visualization" aria-label="Interactive swimming demonstration" className="lane-stage">
+              <LaneView />
+              <div className="lane-vignette pointer-events-none" />
+              <div className="lane-topline pointer-events-none">
+                <span className="view-label"><span className={cn('status-dot', !playing && 'is-paused')} />{cameraLabel}</span>
+                <span className={cn('form-label', mode === 'error' && drillId !== 'comparison' && 'is-error')}>{drillId === 'comparison' ? 'Efficient vs rushed' : mode === 'correct' ? 'Efficient form' : 'Common error'}</span>
+              </div>
+              {(ghost || drillId === 'comparison') && <div className="lane-legend pointer-events-none">{drillId === 'comparison' ? <><span><i className="legend-dot" />Far lane · efficient</span><span><i className="legend-dot error" />Near lane · rushed</span></> : <span><i className="legend-dot ghost" />Ghost shows {mode === 'correct' ? 'the common error' : 'efficient form'}</span>}</div>}
+              <div className="lane-cues">
+                <span className="eyebrow">Explore a focal point<ArrowUpRight className="size-3.5" aria-hidden="true" /></span>
+                <div className="flex flex-wrap gap-2">{drill.tags.map((tag) => {
+                  const on = highlight === tag.cue;
+                  return <button key={tag.label} type="button" aria-pressed={on} onClick={() => setHighlight(on ? null : tag.cue)} className={cn('cue-button', on && 'is-active')}>{tag.label}</button>;
+                })}</div>
+              </div>
+            </section>
+            <PlaybackDock />
+            <div className="workspace-footer">
+              <span><span className="status-dot" />A quieter stroke starts with one small change.</span>
+              <details className="shortcut-help">
+                <summary><Keyboard className="size-4" aria-hidden="true" />Keyboard shortcuts</summary>
+                <div className="shortcut-popover"><p><kbd>Space</kbd>Play / pause</p><p><kbd>1–5</kbd>Camera views</p><p><kbd>C / E</kbd>Efficient / common error</p><p><kbd>G</kbd>Ghost comparison</p><p><kbd>← / →</kbd>Previous / next lesson</p><p><kbd>Esc</kbd>Exit focus</p></div>
+              </details>
+            </div>
+          </main>
+          <div hidden={focus} className="insight-column"><LessonPanel key={drillId} /><DragMeter /></div>
         </div>
       </div>
     </div>

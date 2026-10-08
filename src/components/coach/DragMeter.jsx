@@ -9,7 +9,7 @@ function Bar({ label, value, hint }) {
         <span className="text-xs font-medium text-fg">{label}</span>
         <span className="text-xs uppercase tracking-[0.14em] text-muted">{hint}</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-bg/70">
+      <div className="h-1.5 overflow-hidden rounded-full bg-bg/70" role="meter" aria-label={`${label} drag illustration`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value * 100)}>
         <div
           className={cn('h-full rounded-full', hot ? 'bg-warn' : 'bg-accent')}
           style={{ width: `${Math.round(value * 100)}%` }}
@@ -27,11 +27,11 @@ export function DragMeter() {
   return (
     <aside
       data-testid="drag-meter"
-      className="absolute right-3 top-4 z-10 w-48 rounded-lg bg-bg/55 px-3 py-3 text-fg backdrop-blur-sm md:right-5 md:top-5"
+      className="drag-panel"
     >
       <div className="flex items-baseline justify-between gap-2">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">Drag</p>
-        <p className="font-display text-lg tabular-nums leading-none">{pct}</p>
+        <h2 className="eyebrow">Water resistance</h2>
+        <p className="drag-value">{pct}<span>/100</span></p>
       </div>
       <p className={cn('mt-1 text-sm', drag.label === 'Noisy' ? 'text-warn' : 'text-accent')}>
         {drag.label}
@@ -47,6 +47,7 @@ export function DragMeter() {
           Quiet {pct} · rushed {Math.round(drag.otherTotal * 100)}
         </p>
       ) : null}
+      <p className="simulation-note">Illustrative model · lower is quieter.<br />Not a measurement of your swimming.</p>
     </aside>
   );
 }

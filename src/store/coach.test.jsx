@@ -1,11 +1,29 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from '../App';
-import { LEGACY_PROGRESS_KEY, ONBOARD_KEY, PROGRESS_KEY, useCoach } from './coach';
+import { LEGACY_PROGRESS_KEY, ONBOARD_KEY, PROGRESS_KEY, SESSION_KEY, useCoach } from './coach';
 
 afterEach(() => vi.restoreAllMocks());
 
 describe('saved mastery', () => {
+  it('resumes the last selected drill without awarding mastery', () => {
+    useCoach.getState().setDrill('rhythm');
+    expect(localStorage.getItem(SESSION_KEY)).toBe('rhythm');
+    useCoach.setState({ drill: 'superman', hydrated: false });
+    useCoach.getState().hydrate();
+    expect(useCoach.getState().drill).toBe('rhythm');
+    expect(useCoach.getState().completed).toEqual({});
+  });
+
+  it.each(['unknown', 'constructor', '__proto__'])('ignores invalid saved and selected drill %s', (id) => {
+    localStorage.setItem(SESSION_KEY, id);
+    useCoach.getState().hydrate();
+    useCoach.getState().setDrill(id);
+    useCoach.getState().markComplete(id);
+    expect(useCoach.getState().drill).toBe('superman');
+    expect(useCoach.getState().completed).toEqual({});
+  });
+
   it('merges previously saved v2 mastery with new v3 completions', () => {
     localStorage.setItem(ONBOARD_KEY, '1');
     localStorage.setItem(LEGACY_PROGRESS_KEY, JSON.stringify({ superman: true, flutter: true }));
@@ -44,6 +62,8 @@ describe('saved mastery', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Begin practice' }));
     fireEvent.click(screen.getByRole('button', { name: 'Mark mastered' }));
     expect(screen.getByText('1 / 14 mastered')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Next drill' }));
+    expect(screen.getByRole('heading', { name: 'Lazy Flutter' })).toBeInTheDocument();
     getItem.mockRestore();
     setItem.mockRestore();
   });

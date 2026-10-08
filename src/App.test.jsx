@@ -3,12 +3,47 @@ import { describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { createMatchMedia } from './test/setup';
 import { useCoach } from './store/coach';
+import { DRILLS } from './data/drills';
 
 async function beginPractice() {
   fireEvent.click(await screen.findByRole('button', { name: 'Begin practice' }));
 }
 
 describe('App curriculum and layout', () => {
+  it('keeps full instruction available and closes the notes when the lesson changes', async () => {
+    render(<App />);
+    await beginPractice();
+    expect(screen.getByText(DRILLS.superman.description)).not.toBeVisible();
+    fireEvent.click(screen.getByText('Read the full lesson'));
+    expect(screen.getByText(DRILLS.superman.description)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Next drill' }));
+    expect(screen.getByText(DRILLS.flutter.description)).not.toBeVisible();
+    expect(screen.getByRole('button', { name: 'Lazy Flutter' })).toHaveAttribute('aria-current', 'step');
+  });
+
+  it('disables the redundant ghost control and shortcut in the paired lesson', async () => {
+    render(<App />);
+    await beginPractice();
+    fireEvent.click(screen.getByRole('button', { name: /Efficient vs Rushed/ }));
+    expect(screen.getByRole('button', { name: 'Ghost', exact: true })).toBeDisabled();
+    fireEvent.keyDown(document.body, { key: 'g' });
+    expect(useCoach.getState().ghost).toBe(false);
+  });
+
+  it('focuses onboarding, makes the workspace inert, and keeps Tab within the dialog', async () => {
+    render(<App />);
+    const begin = await screen.findByRole('button', { name: 'Begin practice' });
+    expect(begin).toHaveFocus();
+    expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
+    expect(document.querySelector('.coach-shell')).toHaveAttribute('inert');
+    const tab = createEvent.keyDown(begin, { key: 'Tab', cancelable: true });
+    fireEvent(begin, tab);
+    expect(tab.defaultPrevented).toBe(true);
+    expect(begin).toHaveFocus();
+    fireEvent.click(begin);
+    expect(document.querySelector('.coach-shell')).not.toHaveAttribute('inert');
+  });
+
   it('only completes a drill after an explicit completion action', async () => {
     render(<App />);
     await beginPractice();
@@ -26,14 +61,18 @@ describe('App curriculum and layout', () => {
     expect(screen.getByRole('button', { name: 'Mastered' })).toBeDisabled();
   });
 
-  it('uses a viewport-relative focus layout', async () => {
+  it('keeps playback available in focus mode and exits with Escape from a focused control', async () => {
     render(<App />);
     await beginPractice();
     fireEvent.click(screen.getByRole('button', { name: 'Focus' }));
 
-    const visualization = screen.getByTestId('visualization');
-    expect(visualization.className).toContain('h-[calc(100dvh-9.5rem)]');
-    expect(visualization.className).toContain('min-h-[420px]');
+    expect(screen.getByTestId('visualization')).toBeVisible();
+    expect(screen.queryByRole('navigation', { name: 'Curriculum' })).not.toBeInTheDocument();
+    const exit = screen.getByRole('button', { name: 'Exit focus' });
+    exit.focus();
+    fireEvent.keyDown(exit, { key: 'Escape' });
+    expect(screen.getByRole('navigation', { name: 'Curriculum' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Focus' })).toBeInTheDocument();
   });
 
   it('pauses playback when the user prefers reduced motion', async () => {

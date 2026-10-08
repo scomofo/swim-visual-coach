@@ -1,7 +1,7 @@
 import * as THREE from "three";
 const SKIN = new THREE.Color("#d9a07c");
-const CAP = new THREE.Color("#0b161c");
-const SUIT = new THREE.Color("#102028");
+const CAP = new THREE.Color("#8cc8bd");
+const SUIT = new THREE.Color("#1b4652");
 const GOGGLE_FRAME = new THREE.Color("#1a242c");
 const GOGGLE_LENS = new THREE.Color("#9fe0d8");
 const GHOST = new THREE.Color("#9fd8d2");

@@ -10,6 +10,7 @@ Interactive visual coaching system for Total Immersion freestyle instruction.
 - Framer Motion
 - React Three Fiber
 - Vitest + React Testing Library
+- Playwright browser acceptance checks
 
 ## Development checks
 
@@ -22,18 +23,36 @@ npm run build
 
 Pull requests run the full check suite on Node.js 20 and 22.
 
+To check the production app in Chromium, including the GitHub Pages sub-path:
+
+```bash
+npx playwright install --with-deps chromium
+DEPLOY_TARGET=gh-pages npm run build
+DEPLOY_TARGET=gh-pages npm run test:browser
+```
+
+The browser script starts and closes its own preview server. Set `SWIM_QA_DIR`
+to choose where screenshots and `verdict.json` are written. An existing Chromium
+installation can be selected with `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
+Pull requests also run this browser suite on Node.js 22.
+
+See [the coaching workspace acceptance record](docs/coaching-workspace-acceptance.md)
+for the checked flows and a preview of the design.
+
 ## Features
 
 - 3D lane with a skeletal freestyle swimmer
 - Correct vs common-error motion profiles
 - Ghost overlay and side-by-side comparison
 - Hydrodynamic drag readout (form, wave, skin)
-- Interactive lesson progression
+- A visible, phase-grouped learning path through all 14 lessons
+- A focused 3D practice stage with separate coaching guidance and full lesson notes
+- Explicit mastery tracking and automatic return to the last lesson
 - Breathing and rhythm coaching
-- Playback, camera, and guide controls
+- Playback, restart, camera, and guide controls, with selectable focal points
+- Keyboard shortcuts, accessible onboarding, and reduced-motion support
 - Spoken drill narration with a selectable voice (turn on **Narrate**, then pick a voice; the choice is remembered)
-- Adaptive coaching scaffolding
-- Export-ready lesson cards
+- Self-hosted fonts and responsive desktop, laptop, and narrow layouts
 
 ## Curriculum Progression
 
@@ -60,7 +79,9 @@ The lane scores three sources of drag on every frame:
 - **Wave** — splash, bounce, and bow wave
 - **Skin** — extra friction from thrashy kicking
 
-Quiet water is the tell. Switch **Correct** and **Common Error**, then use **Head-on** to see the frontal plate.
+Quiet water is the tell. Switch **Efficient** and **Common error**, then use **Head-on** to see the frontal plate.
+These values describe the demonstration's motion profile; they are illustrative,
+not measurements of the person using the app.
 
 ## Future Systems
 

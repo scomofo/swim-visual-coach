@@ -1,5 +1,5 @@
-const WALL = "#0a2430";
-const DECK = "#0d1c24";
+const WALL = "#153e4c";
+const DECK = "#25434d";
 const TILE = "#163844";
 function Wall({
   position,
@@ -12,15 +12,16 @@ function Wall({
 }
 function Rope({ z }) {
   const floats = [];
-  for (let i = 0; i < 28; i++) {
-    const x = 1.2 + i * 0.85;
-    const red = i % 2 === 0;
+  for (let i = 0; i < 72; i++) {
+    const x = 1.0 + i * 0.32;
+    const end = i < 12 || i > 60;
+    const alternate = Math.floor(i / 4) % 2 === 0;
     floats.push(
-      <mesh key={i} position={[x, 0.02, z]}>
-        <sphereGeometry args={[0.07, 10, 8]} />
+      <mesh key={i} position={[x, 0.02, z]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.064, 0.064, 0.22, 10]} />
         <meshStandardMaterial
-        color={red ? "#b85c5c" : "#e8eef0"}
-        roughness={0.45}
+        color={end ? "#c98372" : alternate ? "#6bb9b4" : "#dee8e6"}
+        roughness={0.35}
       />
       </mesh>
     );
@@ -83,9 +84,9 @@ function PoolEnv() {
 function Lights() {
   return <>
       <hemisphereLight args={["#d7e8ee", "#102830", 0.72]} />
-      <ambientLight intensity={0.38} />
+      <ambientLight intensity={0.5} />
       <directionalLight position={[7, 9, 6]} intensity={1.25} color="#fff6e8" />
-      <directionalLight position={[2, 1.6, 5.2]} intensity={0.85} color="#e7f4f4" />
+      <directionalLight position={[2, 1.6, 5.2]} intensity={1.0} color="#e7f4f4" />
       <directionalLight position={[-5, 2.4, 2]} intensity={0.45} color="#9fd8d2" />
       <pointLight
     position={[8, 2.2, 2.2]}

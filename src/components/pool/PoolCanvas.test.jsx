@@ -41,6 +41,39 @@ function assertInFrame(camera, swimmer) {
 }
 
 describe('3D playback', () => {
+  it('restarts at the initial pose while preserving pause and speed', async () => {
+    useCoach.setState({ drill: 'rhythm', speed: 0.5 });
+    const renderer = await ReactThreeTestRenderer.create(<PoolScene />);
+    try {
+      await advance(renderer, 1, 0);
+      const swimmer = renderer.scene.findByProps({ name: 'efficient-swimmer' }).instance;
+      const start = swimmer.position.clone();
+      await advance(renderer, 15);
+      expect(swimmer.position.equals(start)).toBe(false);
+      await ReactThreeTestRenderer.act(async () => {
+        useCoach.getState().setPlaying(false);
+        useCoach.getState().restartPlayback();
+      });
+      await advance(renderer, 1);
+      expect(swimmer.position.equals(start)).toBe(true);
+      expect(useCoach.getState().playing).toBe(false);
+      expect(useCoach.getState().speed).toBe(0.5);
+    } finally { await renderer.unmount(); }
+  });
+
+  it('preserves the selected body highlight when switching motion profiles', async () => {
+    useCoach.setState({ drill: 'rhythm', highlight: 'head' });
+    const renderer = await ReactThreeTestRenderer.create(<PoolScene />);
+    try {
+      await advance(renderer, 1);
+      const glowing = () => renderer.scene.findAllByType('Mesh').filter((node) => node.instance.material.emissiveIntensity === 0.7);
+      expect(glowing().length).toBeGreaterThan(0);
+      await ReactThreeTestRenderer.act(async () => useCoach.getState().setMode('error'));
+      await advance(renderer, 1);
+      expect(glowing().length).toBeGreaterThan(0);
+    } finally { await renderer.unmount(); }
+  });
+
   it('freezes the swimmer, water, bubbles, splash, and wake when paused', async () => {
     useCoach.setState({ drill: 'rhythm' });
     const renderer = await ReactThreeTestRenderer.create(<PoolScene />);
@@ -98,6 +131,23 @@ describe('3D playback', () => {
 });
 
 describe('comparison framing', () => {
+  it.each(['quarter', 'side', 'overhead', 'front', 'under'])('frames the entire single swimmer in %s view', async (view) => {
+    for (const width of [1000, 300]) {
+      for (const drill of ['superman', 'breathing', 'rhythm']) {
+        for (const mode of ['correct', 'error']) {
+          useCoach.setState({ drill, mode, camera: view, ghost: false });
+          const camera = new THREE.PerspectiveCamera(34, width / 600, 0.12, 90);
+          const renderer = await ReactThreeTestRenderer.create(<PoolScene />, { camera, width, height: 600 });
+          try {
+            await advance(renderer, 15);
+            const swimmer = renderer.scene.findByProps({ name: mode === 'error' ? 'error-swimmer' : 'efficient-swimmer' }).instance;
+            assertInFrame(camera, swimmer);
+          } finally { await renderer.unmount(); }
+        }
+      }
+    }
+  });
+
   it('keeps the ideal ghost alongside a common-error swimmer without changing its cadence', async () => {
     useCoach.setState({ drill: 'rhythm', mode: 'error', ghost: true });
     const camera = new THREE.PerspectiveCamera(34, 2, 0.12, 90);

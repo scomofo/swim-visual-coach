@@ -28,6 +28,12 @@ export default [
     },
   },
   {
+    files: ['scripts/**/*.mjs'],
+    // Playwright evaluate callbacks execute in the page's browser context.
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    rules: js.configs.recommended.rules,
+  },
+  {
     files: ['*.config.js'],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },

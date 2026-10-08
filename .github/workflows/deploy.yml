@@ -35,3 +35,31 @@ jobs:
 
       - name: Build app
         run: npm run build
+
+  browser:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_TARGET: gh-pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build GitHub Pages app
+        run: npm run build
+
+      - name: Exercise the production app in Chromium
+        env:
+          SWIM_QA_DIR: ${{ runner.temp }}/swim-qa
+        run: npm run test:browser

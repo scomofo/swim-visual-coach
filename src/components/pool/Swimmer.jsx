@@ -82,14 +82,14 @@ function Swimmer({
   const headMat = useMemo(() => skin.clone(), [skin]);
   const chestMat = useMemo(() => {
     const m = suit.clone();
-    m.color.set("#15222c");
+    if (!ghost) m.color.set("#1b4652");
     return m;
-  }, [suit]);
+  }, [suit, ghost]);
   const hipMat = useMemo(() => {
     const m = suit.clone();
-    m.color.set("#121c24");
+    if (!ghost) m.color.set("#153642");
     return m;
-  }, [suit]);
+  }, [suit, ghost]);
   const armMat = useMemo(() => skin.clone(), [skin]);
   const kickMat = useMemo(() => skin.clone(), [skin]);
   const goggleMat = useMemo(
@@ -107,7 +107,7 @@ function Swimmer({
   const bind = (name) => (node) => {
     if (node) joints.current[name] = node;
   };
-  const lastCue = useRef(Symbol("init"));
+  const lastCue = useRef({ cue: Symbol("init"), skin: null });
   useFrame(() => {
     const j = joints.current;
     if (!j.root || !j.hips) return;
@@ -117,8 +117,8 @@ function Swimmer({
       target.current.set(pose.x + 0.4, pose.y + 0.04, pose.z);
     }
     const cue = ghost ? null : highlight;
-    if (cue !== lastCue.current) {
-      lastCue.current = cue;
+    if (cue !== lastCue.current.cue || skin !== lastCue.current.skin) {
+      lastCue.current = { cue, skin };
       setHighlight(
         [headMat, chestMat, hipMat, armMat, kickMat, cap],
         cue,
